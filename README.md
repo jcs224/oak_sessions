@@ -19,7 +19,7 @@ To use Session, you need to first add in Session as middleware. Once added, you 
 
 ```javascript
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
-import { Session } from "https://raw.githubusercontent.com/denjucks/session/master/mod.ts";
+import { Session } from "https://deno.land/x/session/mod.ts";
 
 const app = new Application();
 
