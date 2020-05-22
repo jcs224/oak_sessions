@@ -35,7 +35,7 @@ app.use(session.use()(session));
 // Creating a Router and using the session
 const router = new Router();
 
-router.get("/hello", async (context) => {
+router.get("/", async (context) => {
 
     // Examples of getting and setting variables on a session
     if (await context.session.get("pageCount") === undefined) {
