@@ -37,15 +37,15 @@ const router = new Router();
 
 router.get("/hello", async (context) => {
 
-	// Examples of getting and setting variables on a session
-	if (await context.session.get("pageCount") === undefined) {
-		await context.session.set("pageCount", 0);
+    // Examples of getting and setting variables on a session
+    if (await context.session.get("pageCount") === undefined) {
+        await context.session.set("pageCount", 0);
 
-	} else {
-		await context.session.set("pageCount", await context.session.get("pageCount") + 1);
-	}
-	
-	context.response.body = `Visited page ${await context.session.get("pageCount")} times`;
+    } else {
+        await context.session.set("pageCount", await context.session.get("pageCount") + 1);
+    }
+    
+    context.response.body = `Visited page ${await context.session.get("pageCount")} times`;
 });
 
 app.use(router.routes());
@@ -61,7 +61,7 @@ You can add configuration options within the Session constructor to specify the 
 
 ```javascript
 const session = new Session({
-	framework: "oak",
+    framework: "oak",
 });
 ```
 
@@ -69,8 +69,8 @@ By default if no store is chosen, the memory store will be used. You can also ex
 
 ```javascript
 const session = new Session({
-	framework: "oak",
-	store: "memory",
+    framework: "oak",
+    store: "memory",
 });
 ```
 
@@ -78,10 +78,10 @@ If choosing the Redis store, you also need to provide additional configurations 
 
 ```javascript
 const session = new Session({
-	framework: "oak",
-	store: "memory",
-	hostname: "127.0.0.1";
-	port: 6379,
+    framework: "oak",
+    store: "memory",
+    hostname: "127.0.0.1";
+    port: 6379,
 });
 ```
 
