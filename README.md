@@ -3,6 +3,8 @@
 Session adds the ability to use sessions with deno web frameworks. Session is very easy to use and takes inspiration from the express-sessions library. Session currently supports the following deno web frameworks:
 
 * [**Oak**](https://deno.land/x/oak)
+* [**Attain**](https://deno.land/x/attain)
+
 
 Session allows you to specify the store used to store session data. Session currently supports the following stores:
 
@@ -53,6 +55,48 @@ app.use(router.allowedMethods());
 
 await app.listen({ port: 8000 });
 ```
+
+### Attain
+
+```ts
+import { App, logger } from "https://deno.land/x/attain/mod.ts";
+import { Session } from "https://deno.land/x/session/mod.ts";
+
+const app = new App();
+
+const session = new Session({ framework: "attain" })
+await session.init();
+
+app.use(logger);
+app.use(session.use()(session)); // able to add options at second params
+
+app.use("/", async (req, res) => {
+  // Examples of getting and setting variables on a session
+  if (await req.session.get("pageCount") === undefined) {
+    await req.session.set("pageCount", 0);
+  } else {
+    await req.session.set("pageCount", await req.session.get("pageCount") + 1);
+  }
+  res.status(200).send(`Visited page ${await req.session.get("pageCount")} times`)
+});
+
+console.log("Server at http://localhost:8080");
+await app.listen({ port: 8080 });
+```
+
+### Cookie Options
+```ts
+// These are default options
+app.use(session.use()(session, { path: "/", httpOnly: true, secure: false }))
+```
+- `expires?: Date`: Max-Age of the Cookie. Must be integer superior to 0.
+- `maxAge?: number`: Specifies those hosts to which the cookie will be sent.
+- `domain?: string`: Indicates a URL path that must exist in the request.
+- `path?: string`: Indicates if the cookie is made using SSL & HTTPS.
+- `secure?: boolean`: Indicates that cookie is not accessible via JavaScript.
+- `httpOnly?: boolean`: Allows servers to assert that a cookie ought not to be sent along with cross-site requests.
+- `sameSite?: SameSite`: Additional key value pairs with the form "key=value"
+- `unparsed?: string[]`
 
 
 ## Configurations
