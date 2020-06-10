@@ -19,7 +19,7 @@ To use Session, you need to first add in Session as middleware. Once added, you 
 
 ### Oak
 
-```javascript
+```ts
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Session } from "https://deno.land/x/session/mod.ts";
 
@@ -40,14 +40,14 @@ const router = new Router();
 router.get("/", async (context) => {
 
     // Examples of getting and setting variables on a session
-    if (await context.session.get("pageCount") === undefined) {
-        await context.session.set("pageCount", 0);
+    if (await context.state.session.get("pageCount") === undefined) {
+        await context.state.session.set("pageCount", 0);
 
     } else {
-        await context.session.set("pageCount", await context.session.get("pageCount") + 1);
+        await context.state.session.set("pageCount", await context.state.session.get("pageCount") + 1);
     }
     
-    context.response.body = `Visited page ${await context.session.get("pageCount")} times`;
+    context.response.body = `Visited page ${await context.state.session.get("pageCount")} times`;
 });
 
 app.use(router.routes());
@@ -141,7 +141,7 @@ Stores are added internally by implementing the **IStore** interface. All stores
 
 MIT License
 
-Copyright (c) 2020 Anthony Mancini
+Copyright (c) 2020 Anthony Mancini and contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

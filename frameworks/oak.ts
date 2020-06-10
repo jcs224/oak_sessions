@@ -5,16 +5,16 @@ export default function use(session: any) {
 		const sid = context.cookies.get("sid");
 		
 		if (sid === undefined) {
-			context.session = new SessionData(session);
-			context.cookies.set("sid", context.session.sessionId);
+			context.state.session = new SessionData(session);
+			context.cookies.set("sid", context.state.session.sessionId);
 		} else if(session._store.sessionExists(sid) === false) {
-			context.session = new SessionData(session);
-			context.cookies.set("sid", context.session.sessionId);
+			context.state.session = new SessionData(session);
+			context.cookies.set("sid", context.state.session.sessionId);
 		} else {
-			context.session = new SessionData(session, sid);
+			context.state.session = new SessionData(session, sid);
 		}
 		
-		await context.session.init();
+		await context.state.session.init();
 	
 		await next();
 	}
