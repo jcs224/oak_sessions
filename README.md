@@ -123,7 +123,7 @@ If choosing the Redis store, you also need to provide additional configurations 
 ```javascript
 const session = new Session({
     framework: "oak",
-    store: "memory",
+    store: "redis",
     hostname: "127.0.0.1";
     port: 6379,
 });
