@@ -1,4 +1,20 @@
 import { v4 } from "https://deno.land/std/uuid/mod.ts";
+import * as Memory from "./stores/memory.ts"
+import * as Redis from "./stores/redis.ts"
+import * as Interface from "./stores/interface.ts"
+import * as Oak from "./frameworks/oak.ts"
+import * as Attain from "./frameworks/attain.ts"
+
+const stores: any = {
+	memory: Memory,
+	redis: Redis,
+	interface: Interface
+}
+
+const frameworks: any = {
+	oak: Oak,
+	attain: Attain
+}
 
 interface ISessionOptions {
 	framework: string;
@@ -23,12 +39,12 @@ export class Session {
 	}
 	
 	public async init() {
-		this._storeLib = await import(`./stores/${this._options.store}.ts`);
+		this._storeLib = stores[this._options.store];
 		this._storeLib = this._storeLib.default;
 		this._store = new this._storeLib(this._options);
 		await this._store.init();
 		
-		this._frameworkLib = await import(`./frameworks/${this._options.framework}.ts`);
+		this._frameworkLib = frameworks[this._options.framework];
 		this._frameworkLib = this._frameworkLib.default;
 	}
 
