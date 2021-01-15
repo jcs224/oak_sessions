@@ -14,8 +14,8 @@ const stores: any = {
 
 const frameworks: any = {
 	oak: Oak,
-  attain: Attain,
-  opine: Opine,
+	attain: Attain,
+	opine: Opine,
 }
 
 interface ISessionOptions {
