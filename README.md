@@ -4,7 +4,7 @@ Session adds the ability to use sessions with deno web frameworks. Session is ve
 
 * [**Oak**](https://deno.land/x/oak)
 * [**Attain**](https://deno.land/x/attain)
-
+* [**Opine**](https://deno.land/x/opine)
 
 Session allows you to specify the store used to store session data. Session currently supports the following stores:
 
@@ -82,6 +82,33 @@ app.use("/", async (req, res) => {
 
 console.log("Server at http://localhost:8080");
 await app.listen({ port: 8080 });
+```
+
+### Opine
+
+```ts
+import { opine } from "https://deno.land/x/opine/mod.ts";
+import { Session } from "https://deno.land/x/session/mod.ts";
+
+const app = opine();
+
+const session = new Session({ framework: "opine" })
+await session.init();
+
+app.use(session.use()(session)); // able to add options at second params
+
+app.use("/", async (req, res) => {
+  // Examples of getting and setting variables on a session
+  if (await req.session.get("pageCount") === undefined) {
+    await req.session.set("pageCount", 1);
+  } else {
+    await req.session.set("pageCount", await req.session.get("pageCount") + 1);
+  }
+
+  res.setStatus(200).send(`Visited page ${await req.session.get("pageCount")} times`)
+});
+
+app.listen(8080, () => console.log("Server at http://localhost:8080"));
 ```
 
 ### Cookie Options

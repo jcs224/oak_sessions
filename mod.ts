@@ -4,6 +4,7 @@ import * as Redis from "./stores/redis.ts"
 import * as Interface from "./stores/interface.ts"
 import * as Oak from "./frameworks/oak.ts"
 import * as Attain from "./frameworks/attain.ts"
+import * as Opine from "./frameworks/opine.ts"
 
 const stores: any = {
 	memory: Memory,
@@ -13,7 +14,8 @@ const stores: any = {
 
 const frameworks: any = {
 	oak: Oak,
-	attain: Attain
+  attain: Attain,
+  opine: Opine,
 }
 
 interface ISessionOptions {
