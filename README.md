@@ -128,6 +128,16 @@ const session = new Session({
 });
 ```
 
+If choosing the SQLite store, you also need to provide additional configurations (in this case **path**):
+
+```javascript
+const session = new Session({
+    framework: "oak",
+    store: "sqlite",
+    path: "./database.db"
+});
+```
+
 
 ## Implementation details
 
