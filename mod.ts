@@ -1,14 +1,16 @@
-import { v4 } from "https://deno.land/std/uuid/mod.ts";
+import { v4 } from "https://deno.land/std@0.93.0/uuid/mod.ts";
 import * as Memory from "./stores/memory.ts"
 import * as Redis from "./stores/redis.ts"
 import * as Interface from "./stores/interface.ts"
 import * as Oak from "./frameworks/oak.ts"
 import * as Opine from "./frameworks/opine.ts"
+import * as SQLite from './stores/sqlite.ts'
 
 const stores: any = {
 	memory: Memory,
 	redis: Redis,
-	interface: Interface
+	sqlite: SQLite,
+	interface: Interface,
 }
 
 const frameworks: any = {
