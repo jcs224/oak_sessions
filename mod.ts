@@ -3,7 +3,6 @@ import * as Memory from "./stores/memory.ts"
 import * as Redis from "./stores/redis.ts"
 import * as Interface from "./stores/interface.ts"
 import * as Oak from "./frameworks/oak.ts"
-import * as Attain from "./frameworks/attain.ts"
 import * as Opine from "./frameworks/opine.ts"
 
 const stores: any = {
@@ -14,7 +13,6 @@ const stores: any = {
 
 const frameworks: any = {
 	oak: Oak,
-	attain: Attain,
 	opine: Opine,
 }
 
