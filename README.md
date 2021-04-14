@@ -9,6 +9,7 @@ Session allows you to specify the store used to store session data. Session curr
 
 * **MemoryStore ("memory")**: Stores all session data within memory. Good for debugging and testing, but should not be used in production.
 * **RedisStore ("redis")**: Uses the Redis database to store session data. Internally, the deno [redis](https://deno.land/x/redis) library is used as the driver to interact with a redis database.
+* **SqliteStore ("redis")**: Uses the SQLite database to store session data. Internally, the deno [sqlite](https://deno.land/x/sqlite) library is used as the driver to interact with a SQLite database.
 
 
 ## Usage
