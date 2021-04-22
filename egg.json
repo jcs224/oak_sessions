@@ -1,0 +1,22 @@
+{
+  "$schema": "https://x.nest.land/eggs@0.3.6/src/schema.json",
+  "name": "sessions",
+  "description": "Sessions for Deno web frameworks",
+  "homepage": "https://github.com/jcs224/deno_sessions",
+  "version": "1.3.0",
+  "files": [
+    "./frameworks/**/*",
+    "./stores/**/*",
+    "./README.md",
+    "./LICENSE"
+  ],
+  "ignore": [
+    ".git"
+  ],
+  "checkFormat": false,
+  "checkTests": false,
+  "checkInstallation": false,
+  "check": true,
+  "entry": "./mod.ts",
+  "unlisted": false
+}
