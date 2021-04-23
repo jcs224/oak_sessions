@@ -11,12 +11,14 @@ export default class SessionData {
 
   createSession() {
     const newId = v4.generate()
-    this.store.createSession(newId)
+    this.id = newId
+    this.store.createSession(this.id)
     return newId
   }
 
   getSession(id: string) {
-    return this.store.getSessionById(id)
+    this.id = id
+    return this
   }
 
   get(key: string) {

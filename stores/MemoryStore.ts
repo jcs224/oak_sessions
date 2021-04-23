@@ -10,25 +10,16 @@ export default class MemoryStore {
   }
 
   createSession(sessionId: string) {
-    this.data.set(sessionId, new Map)
+    this.data.set(sessionId, {})
   }
 
   getSessionVariable(sessionId: string, variableKey: string) {
     const session = this.data.get(sessionId)
-    return session.get(variableKey)
+    return session[variableKey]
   }
 
   setSessionVariable(sessionId: string, variableKey: string, variableValue: string) {
     const session = this.data.get(sessionId)
-    session.set(variableKey, variableValue)
-  }
-
-  deleteSessionVariable(sessionId: string, variableKey: string) {
-    const session = this.data.get(sessionId)
-    session.delete(variableKey)
-  }
-
-  deleteSession(sessionId: string) {
-    this.data.delete(sessionId)
+    session[variableKey] = variableValue
   }
 }
