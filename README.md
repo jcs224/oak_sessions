@@ -3,38 +3,23 @@
 Session adds the ability to use sessions with deno web frameworks. Session is very easy to use and takes inspiration from the express-sessions library. Session currently supports the following deno web frameworks:
 
 * [**Oak**](https://deno.land/x/oak)
-* [**Opine**](https://deno.land/x/opine)
 
-Session allows you to specify the store used to store session data. Session currently supports the following stores:
-
-* **MemoryStore ("memory")**: Stores all session data within memory. Good for debugging and testing, but should not be used in production.
-* **RedisStore ("redis")**: Uses the Redis database to store session data. Internally, the deno [redis](https://deno.land/x/redis) library is used as the driver to interact with a redis database.
-* **SqliteStore ("sqlite")**: Uses the SQLite database to store session data. Internally, the deno [sqlite](https://deno.land/x/sqlite) library is used as the driver to interact with a SQLite database.
-
+Session allows you to specify the store used to store session data. 
 
 ## Usage
 
-To use Session, you need to first add in Session as middleware. Once added, you can get and set variables for the session using the **get** and **set** functions on the session variable created. Below are examples of adding and using Session in various web frameworks:
+To use Session, you need to first add in Session as middleware. Once added, you can get and set variables for the session using the **get** and **set** functions on the session variable created. Below are examples of adding and using Session in Oak:
 
-
-### Oak
 
 ```ts
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
-import { Session } from "https://deno.land/x/session/mod.ts";
+import { OakSession } from "https://deno.land/x/sessions/mod.ts";
 
 const app = new Application();
 
-// Configuring Session for the Oak framework
-const session = new Session({ framework: "oak" });
-await session.init();
+// Attach sessions to middleware
+const session = new OakSession(app);
 
-// Adding the Session middleware. Now every context will include a property
-// called session that you can use the get and set functions on
-app.use(session.use()(session));
-
-
-// Creating a Router and using the session
 const router = new Router();
 
 router.get("/", async (context) => {
@@ -56,101 +41,11 @@ app.use(router.allowedMethods());
 await app.listen({ port: 8000 });
 ```
 
-### Opine
-
-```ts
-import { opine } from "https://deno.land/x/opine/mod.ts";
-import { Session } from "https://deno.land/x/session/mod.ts";
-
-const app = opine();
-
-const session = new Session({ framework: "opine" })
-await session.init();
-
-app.use(session.use()(session)); // able to add options at second params
-
-app.use("/", async (req, res) => {
-  // Examples of getting and setting variables on a session
-  if (await req.session.get("pageCount") === undefined) {
-    await req.session.set("pageCount", 1);
-  } else {
-    await req.session.set("pageCount", await req.session.get("pageCount") + 1);
-  }
-
-  res.setStatus(200).send(`Visited page ${await req.session.get("pageCount")} times`)
-});
-
-app.listen(8080, () => console.log("Server at http://localhost:8080"));
-```
-
-### Cookie Options
-```ts
-// These are default options
-app.use(session.use()(session, { path: "/", httpOnly: true, secure: false }))
-```
-- `expires?: Date`: Max-Age of the Cookie. Must be integer superior to 0.
-- `maxAge?: number`: Specifies those hosts to which the cookie will be sent.
-- `domain?: string`: Indicates a URL path that must exist in the request.
-- `path?: string`: Indicates if the cookie is made using SSL & HTTPS.
-- `secure?: boolean`: Indicates that cookie is not accessible via JavaScript.
-- `httpOnly?: boolean`: Allows servers to assert that a cookie ought not to be sent along with cross-site requests.
-- `sameSite?: SameSite`: Additional key value pairs with the form "key=value"
-- `unparsed?: string[]`
-
-
-## Configurations
-
-You can add configuration options within the Session constructor to specify the framework, store, and store configurations. Below is the simplest configuration, providing only a framework name:
-
-```javascript
-const session = new Session({
-    framework: "oak",
-});
-```
-
-By default if no store is chosen, the memory store will be used. You can also explicitly chose this store in the configuration:
-
-```javascript
-const session = new Session({
-    framework: "oak",
-    store: "memory",
-});
-```
-
-If choosing the Redis store, you also need to provide additional configurations (in this case **hostname** and **port**):
-
-```javascript
-const session = new Session({
-    framework: "oak",
-    store: "redis",
-    hostname: "127.0.0.1";
-    port: 6379,
-});
-```
-
-If choosing the SQLite store, you also need to provide additional configurations (in this case **path**):
-
-```javascript
-const session = new Session({
-    framework: "oak",
-    store: "sqlite",
-    path: "./database.db"
-});
-```
-
-
-## Implementation details
-
-Session works by adding a cookie with the key **sid** and a cryptographically generated UUID v4 as the value for sid. This key is what is used to access all of the session data.
-
-Stores are added internally by implementing the **IStore** interface. All stores implemented with this interface can be used with Session, allowing you to easily create custom stores for this library.
-
-
 ## License
 
 MIT License
 
-Copyright (c) 2020 Anthony Mancini and contributors
+Copyright (c) 2020 Anthony Mancini, Joe Sweeney and contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
