@@ -9,6 +9,10 @@ export default abstract class Session {
     this.store = store || new MemoryStore
   }
 
+  sessionExists(id :string) {
+    return this.store.sessionExists(id)
+  }
+
   createSession() {
     this.id = v4.generate()
     this.store.createSession(this.id)

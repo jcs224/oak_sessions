@@ -5,6 +5,10 @@ export default class MemoryStore {
     this.data = new Map
   }
 
+  sessionExists(sessionId: string) {
+    return this.data.has(sessionId)
+  }
+
   getSessionById(sessionId: string) {
     return this.data.get(sessionId)
   }

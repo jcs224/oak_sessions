@@ -8,6 +8,16 @@ export default class SqliteStore {
     this.db.query("CREATE TABLE IF NOT EXISTS sessions (id TEXT, data TEXT)")
   }
 
+  sessionExists(sessionId: string) {
+    let session = ''
+    
+    for (const [sess] of this.db.query('SELECT data FROM sessions WHERE id = ?', [sessionId])) {
+      session = sess
+    }
+
+    return session ? true : false;
+  }
+
   getSessionById(sessionId: string) {
     let session = ''
     
