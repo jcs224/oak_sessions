@@ -10,10 +10,9 @@ export default abstract class Session {
   }
 
   createSession() {
-    const newId = v4.generate()
-    this.id = newId
+    this.id = v4.generate()
     this.store.createSession(this.id)
-    return newId
+    return this
   }
 
   getSession(id: string) {

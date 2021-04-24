@@ -12,9 +12,8 @@ export default class OakSession extends Session {
       if (sid) {
         ctx.state.session = this.getSession(sid)
       } else {
-        const newId = this.createSession()
-        ctx.state.session = this.getSession(newId)
-        ctx.cookies.set('sid', newId)
+        ctx.state.session = this.createSession()
+        ctx.cookies.set('sid', ctx.state.session.id)
       }
 
       await next();
