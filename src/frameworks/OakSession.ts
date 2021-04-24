@@ -1,4 +1,4 @@
-import Session from '../lib/Session.ts'
+import Session from '../Session.ts'
 
 export default class OakSession extends Session {
   private oakApp: any
@@ -10,10 +10,10 @@ export default class OakSession extends Session {
       const sid = ctx.cookies.get('sid')
 
       if (sid) {
-        ctx.state.session = this.sessionData.getSession(sid)
+        ctx.state.session = this.getSession(sid)
       } else {
-        const newId = this.sessionData.createSession()
-        ctx.state.session = this.sessionData.getSession(newId)
+        const newId = this.createSession()
+        ctx.state.session = this.getSession(newId)
         ctx.cookies.set('sid', newId)
       }
 

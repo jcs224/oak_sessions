@@ -1,7 +1,7 @@
 import { v4 } from "https://deno.land/std@0.93.0/uuid/mod.ts"
-import MemoryStore from '../stores/MemoryStore.ts'
+import MemoryStore from './stores/MemoryStore.ts'
 
-export default class SessionData {
+export default abstract class Session {
   public id: any
   public store: any
 
