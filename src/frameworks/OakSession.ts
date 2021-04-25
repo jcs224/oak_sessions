@@ -9,10 +9,10 @@ export default class OakSession extends Session {
     oakApp.use(async (ctx : any, next : any) => {
       const sid = ctx.cookies.get('sid')
 
-      if (sid && this.sessionExists(sid)) {
+      if (sid && await this.sessionExists(sid)) {
         ctx.state.session = this.getSession(sid)
       } else {
-        ctx.state.session = this.createSession()
+        ctx.state.session = await this.createSession()
         ctx.cookies.set('sid', ctx.state.session.id)
       }
 

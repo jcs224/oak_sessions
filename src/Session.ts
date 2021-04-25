@@ -9,13 +9,13 @@ export default abstract class Session {
     this.store = store || new MemoryStore
   }
 
-  sessionExists(id :string) {
-    return this.store.sessionExists(id)
+  async sessionExists(id :string) {
+    return await this.store.sessionExists(id)
   }
 
-  createSession() {
+  async createSession() {
     this.id = v4.generate()
-    this.store.createSession(this.id)
+    await this.store.createSession(this.id)
     return this
   }
 
@@ -24,11 +24,11 @@ export default abstract class Session {
     return this
   }
 
-  get(key: string) {
-    return this.store.getSessionVariable(this.id, key)
+  async get(key: string) {
+    return await this.store.getSessionVariable(this.id, key)
   }
 
-  set(key: string, value: any) {
-    this.store.setSessionVariable(this.id, key, value)
+  async set(key: string, value: any) {
+    await this.store.setSessionVariable(this.id, key, value)
   }
 }
