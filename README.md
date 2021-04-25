@@ -7,8 +7,8 @@ Session adds the ability to use sessions with deno web frameworks. Session is ve
 Session allows you to specify the store used to store session data. Session currently supports the following stores:
 
 * **MemoryStore**: Stores all session data within memory. Good for debugging and testing, but should not be used in production.
-* **SqliteStore**: Uses the SQLite database to store session data. Internally, the deno [sqlite](https://deno.land/x/sqlite) library is used to interact with a SQLite database.
-
+* **SqliteStore**: Uses a SQLite database to store session data. Internally, the deno [sqlite](https://deno.land/x/sqlite) library is used to interact with a SQLite database.
+* **RedisStore**: Uses a Redis database to store session data. Internally, the deno [redis](https://deno.land/x/redis) library is used to interact with a SQLite database.
 
 ## Usage
 
@@ -45,14 +45,38 @@ app.use(router.allowedMethods());
 await app.listen({ port: 8000 });
 ```
 
-By default, `MemoryStorage` is the storage driver, but you can (and should in production) use a more robust and persistent storage driver. Here's an example of using the SQLite driver:
+By default, `MemoryStorage` is the storage driver, but you can (and should in production) use a more robust and persistent storage driver. Here are some options:
 
+## SQLite
 ```ts
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { OakSession, SqliteStore } from "https://deno.land/x/sessions/mod.ts";
 
 const app = new Application();
-const store = new SqliteStore('./database.db')
+const store = new SqliteStore({
+    path: './database.db',
+    tableName: 'sessions' // optional
+})
+
+// Attach sessions to middleware
+const session = new OakSession(app, store);
+
+// ...
+```
+
+## Redis
+```ts
+import { Application, Router } from "https://deno.land/x/oak/mod.ts";
+import { OakSession, RedisStore } from "https://deno.land/x/sessions/mod.ts";
+
+const app = new Application();
+const store = new RedisStore({
+    host: '127.0.0.1',
+    port: 6379
+});
+
+// Since Redis connection is async, must be initialized before used
+await store.init();
 
 // Attach sessions to middleware
 const session = new OakSession(app, store);
