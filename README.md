@@ -3,6 +3,7 @@
 Session adds the ability to use sessions with deno web frameworks. Session is very easy to use and takes inspiration from the express-sessions library. Session currently supports the following deno web frameworks:
 
 * [**Oak**](https://deno.land/x/oak)
+* [**Opine**](https://deno.land/x/opine)
 
 Session allows you to specify the store used to store session data. Session currently supports the following stores:
 
