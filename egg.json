@@ -3,10 +3,9 @@
   "name": "sessions",
   "description": "Sessions for Deno web frameworks",
   "homepage": "https://github.com/jcs224/deno_sessions",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "files": [
-    "./frameworks/**/*",
-    "./stores/**/*",
+    "./src/**/*",
     "./README.md",
     "./LICENSE"
   ],
