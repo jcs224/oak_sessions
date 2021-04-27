@@ -1,12 +1,10 @@
-import Session from '../Session.ts'
+import Session from '../Session.js'
 
 export default class OakSession extends Session {
-  private oakApp: any
-
-  constructor(oakApp: any, store?: any) {
+  constructor(oakApp, store = null) {
     super(store || null)
-    
-    oakApp.use(async (ctx : any, next : any) => {
+
+    oakApp.use(async (ctx, next) => {
       const sid = ctx.cookies.get('sid')
 
       if (sid && await this.sessionExists(sid)) {

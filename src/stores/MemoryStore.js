@@ -1,28 +1,26 @@
 export default class MemoryStore {
-  private data: any
-
   constructor() {
     this.data = new Map
   }
 
-  sessionExists(sessionId: string) {
+  sessionExists(sessionId) {
     return this.data.has(sessionId)
   }
 
-  getSessionById(sessionId: string) {
+  getSessionById(sessionId) {
     return this.data.get(sessionId)
   }
 
-  createSession(sessionId: string) {
+  createSession(sessionId) {
     this.data.set(sessionId, {})
   }
 
-  getSessionVariable(sessionId: string, variableKey: string) {
+  getSessionVariable(sessionId, variableKey) {
     const session = this.data.get(sessionId)
     return session[variableKey]
   }
 
-  setSessionVariable(sessionId: string, variableKey: string, variableValue: string) {
+  setSessionVariable(sessionId, variableKey, variableValue) {
     const session = this.data.get(sessionId)
     session[variableKey] = variableValue
   }

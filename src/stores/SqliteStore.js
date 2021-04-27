@@ -1,18 +1,14 @@
 import { DB } from "https://deno.land/x/sqlite@v2.4.0/mod.ts";
 
 export default class SqliteStore {
-  private db: any
-  private path: string
-  private tableName: string
-
-  constructor(options: any) {
+  constructor(options) {
     this.db = new DB(options.path)
     this.path = options.path
     this.tableName = options.tableName || 'sessions'
     this.db.query(`CREATE TABLE IF NOT EXISTS ${this.tableName} (id TEXT, data TEXT)`)
   }
 
-  sessionExists(sessionId: string) {
+  sessionExists(sessionId) {
     let session = ''
     
     for (const [sess] of this.db.query(`SELECT data FROM ${this.tableName} WHERE id = ?`, [sessionId])) {
@@ -22,7 +18,7 @@ export default class SqliteStore {
     return session ? true : false;
   }
 
-  getSessionById(sessionId: string) {
+  getSessionById(sessionId) {
     let session = ''
     
     for (const [sess] of this.db.query(`SELECT data FROM ${this.tableName} WHERE id = ?`, [sessionId])) {
@@ -32,16 +28,16 @@ export default class SqliteStore {
     return JSON.parse(session);
   }
 
-  createSession(sessionId: string) {
+  createSession(sessionId) {
     this.db.query(`INSERT INTO ${this.tableName} (id, data) VALUES (?, ?)`, [sessionId, JSON.stringify({})]);
   }
 
-  getSessionVariable(sessionId: string, variableKey: string) {
+  getSessionVariable(sessionId, variableKey) {
     const session = this.getSessionById(sessionId)
     return session[variableKey]
   }
 
-  setSessionVariable(sessionId: string, variableKey: string, variableValue: string) {
+  setSessionVariable(sessionId, variableKey, variableValue) {
     const session = this.getSessionById(sessionId);
 		session[variableKey] = variableValue
 		

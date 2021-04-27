@@ -1,15 +1,12 @@
 import { v4 } from "https://deno.land/std@0.93.0/uuid/mod.ts"
-import MemoryStore from './stores/MemoryStore.ts'
+import MemoryStore from './stores/MemoryStore.js'
 
-export default abstract class Session {
-  public id: any
-  public store: any
-
-  constructor (store?: any) {
+export default class Session {
+  constructor (store = null) {
     this.store = store || new MemoryStore
   }
 
-  async sessionExists(id :string) {
+  async sessionExists(id) {
     return await this.store.sessionExists(id)
   }
 
@@ -19,16 +16,16 @@ export default abstract class Session {
     return this
   }
 
-  getSession(id: string) {
+  getSession(id) {
     this.id = id
     return this
   }
 
-  async get(key: string) {
+  async get(key) {
     return await this.store.getSessionVariable(this.id, key)
   }
 
-  async set(key: string, value: any) {
+  async set(key, value) {
     await this.store.setSessionVariable(this.id, key, value)
   }
 }
