@@ -1,20 +1,20 @@
-# Session - Sessions for Deno Web Frameworks
+# Deno Sessions
 
-Session adds the ability to use sessions with deno web frameworks. Session is very easy to use and takes inspiration from the express-sessions library. Session currently supports the following deno web frameworks:
+Sessions adds the ability to use sessions with deno web frameworks. It currently supports the following frameworks:
 
 * [**Oak**](https://deno.land/x/oak)
 * [**Opine**](https://deno.land/x/opine)
 
-Session allows you to specify the store used to store session data. Session currently supports the following stores:
+You can also specify the storage layer used to store session data. Here are the supported storage layers:
 
-* **MemoryStore**: Stores all session data within memory. Good for debugging and testing, but should not be used in production.
-* **SqliteStore**: Uses a SQLite database to store session data. Internally, the deno [sqlite](https://deno.land/x/sqlite) library is used to interact with a SQLite database. Requires filesystem access.
-* **RedisStore**: Uses a Redis database to store session data. Internally, the deno [redis](https://deno.land/x/redis) library is used to interact with a Redis database. Requires a separate Redis server.
-* **WebdisStore**: Uses a Webdis endpoint to store session data. This is ideal for serverless environments, or anywhere that only HTTP endpoints can be accessed (such as Deno Deploy). Requires a Webdis URL.
+* **Memory**: Stores all session data within memory. Good for debugging and testing, but should not be used in production.
+* **SQLite**: Uses a SQLite database to store session data. Internally, the deno [sqlite](https://deno.land/x/sqlite) library is used to interact with a SQLite database. Requires filesystem access.
+* **Redis**: Uses a Redis database to store session data. Internally, the deno [redis](https://deno.land/x/redis) library is used to interact with a Redis database. Requires a separate Redis server.
+* **Webdis**: Uses a Webdis endpoint to store session data. Webdis is a Redis server which allows you to use Redis with an HTTP endpoint. This is ideal for serverless environments, or anywhere that only HTTP endpoints can be accessed (such as Deno Deploy). Requires a Webdis URL.
 
 ## Usage
 
-To use Session, you need to first add in Session as middleware. Once added, you can get and set variables for the session using the **get** and **set** functions on the session variable created. Below are examples of adding and using Session with various frameworks:
+To use Sessions, you need to first add in Session as middleware. Once added, you can get and set variables for the session using the **get** and **set** functions on the session variable created. Below are examples of adding and using Sessions with various frameworks:
 
 ### Oak
 ```ts
