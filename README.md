@@ -14,7 +14,7 @@ You can also specify the storage layer used to store session data. Here are the 
 
 ## Usage
 
-To use Sessions, you need to first add in Session as middleware. Once added, you can get and set variables for the session using the **get** and **set** functions on the session variable created. Below are examples of adding and using Sessions with various frameworks:
+Here are some examples with various web frameworks:
 
 ### Oak
 ```ts
