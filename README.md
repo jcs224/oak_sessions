@@ -37,6 +37,9 @@ router.get("/", async (context) => {
     } else {
         await context.state.session.set("pageCount", await context.state.session.get("pageCount") + 1);
     }
+
+    // If you only want a variable to survive for a single request, you can "flash" it instead
+    await context.state.session.flash("message", "I am good for form validations errors, success messages, etc.")
     
     context.response.body = `Visited page ${await context.state.session.get("pageCount")} times`;
 });
