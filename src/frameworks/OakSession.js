@@ -14,6 +14,8 @@ export default class OakSession extends Session {
         ctx.cookies.set('sid', ctx.state.session.id)
       }
 
+      ctx.state.session.set('_flash', {})
+
       await next();
     })
   }

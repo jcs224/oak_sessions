@@ -28,4 +28,8 @@ export default class Session {
   async set(key, value) {
     await this.store.setSessionVariable(this.id, key, value)
   }
+
+  async flash(key, value) {
+    await this.store.flashSessionVariable(this.id, key, value)
+  }
 }

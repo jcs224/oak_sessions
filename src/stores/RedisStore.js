@@ -26,17 +26,31 @@ export default class RedisStore {
   }
 
   async createSession(sessionId) {
-    await this.db.set(this.keyPrefix + sessionId, JSON.stringify({}))
+    await this.db.set(this.keyPrefix + sessionId, JSON.stringify({
+      '_flash': {}
+    }))
   }
 
   async getSessionVariable(sessionId, variableKey) {
     const session = await this.getSessionById(sessionId)
-    return session[variableKey]
+    
+    if (session.hasOwnProperty(variableKey)) {
+      return session[variableKey]
+    } else {
+      return session['_flash'][variableKey]
+    }
   }
 
   async setSessionVariable(sessionId, variableKey, variableValue) {
     const session = await this.getSessionById(sessionId)
     session[variableKey] = variableValue
+
+    await this.db.set(this.keyPrefix + sessionId, JSON.stringify(session))
+  }
+
+  async flashSessionVariable(sessionId, variableKey, variableValue) {
+    const session = await this.getSessionById(sessionId)
+    session['_flash'][variableKey] = variableValue
 
     await this.db.set(this.keyPrefix + sessionId, JSON.stringify(session))
   }

@@ -29,17 +29,33 @@ export default class SqliteStore {
   }
 
   createSession(sessionId) {
-    this.db.query(`INSERT INTO ${this.tableName} (id, data) VALUES (?, ?)`, [sessionId, JSON.stringify({})]);
+    this.db.query(`INSERT INTO ${this.tableName} (id, data) VALUES (?, ?)`, [sessionId, JSON.stringify({
+      '_flash': {}
+    })]);
   }
 
   getSessionVariable(sessionId, variableKey) {
     const session = this.getSessionById(sessionId)
-    return session[variableKey]
+    
+    if (session.hasOwnProperty(variableKey)) {
+      return session[variableKey]
+    } else {
+      return session['_flash'][variableKey]
+    }
   }
 
   setSessionVariable(sessionId, variableKey, variableValue) {
     const session = this.getSessionById(sessionId);
 		session[variableKey] = variableValue
+		
+		this.db.query(`UPDATE ${this.tableName} SET data = ? WHERE id = ?`, [
+      JSON.stringify(session), sessionId
+    ]);
+  }
+
+  flashSessionVariable(sessionId, variableKey, variableValue) {
+    const session = this.getSessionById(sessionId);
+		session['_flash'][variableKey] = variableValue
 		
 		this.db.query(`UPDATE ${this.tableName} SET data = ? WHERE id = ?`, [
       JSON.stringify(session), sessionId

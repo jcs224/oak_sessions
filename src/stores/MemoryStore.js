@@ -12,16 +12,28 @@ export default class MemoryStore {
   }
 
   createSession(sessionId) {
-    this.data.set(sessionId, {})
+    this.data.set(sessionId, {
+      '_flash': {}
+    })
   }
 
   getSessionVariable(sessionId, variableKey) {
     const session = this.data.get(sessionId)
-    return session[variableKey]
+
+    if (session.hasOwnProperty(variableKey)) {
+      return session[variableKey]
+    } else {
+      return session['_flash'][variableKey]
+    }
   }
 
   setSessionVariable(sessionId, variableKey, variableValue) {
     const session = this.data.get(sessionId)
     session[variableKey] = variableValue
+  }
+
+  flashSessionVariable(sessionId, variableKey, variableValue) {
+    const session = this.data.get(sessionId)
+    session['_flash'][variableKey] = variableValue
   }
 }
