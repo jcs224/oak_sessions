@@ -22,14 +22,24 @@ export default class Session {
   }
 
   async get(key) {
-    return await this.store.getSessionVariable(this.id, key)
+    const session = await this.store.getSessionById(this.id)
+
+    if (session.hasOwnProperty(key)) {
+      return session[key]
+    } else {
+      return session['_flash'][key]
+    }
   }
 
   async set(key, value) {
-    await this.store.setSessionVariable(this.id, key, value)
+    const session = await this.store.getSessionById(this.id)
+    session[key] = value
+    await this.store.persistSessionData(this.id, session)
   }
 
   async flash(key, value) {
-    await this.store.flashSessionVariable(this.id, key, value)
+    const session = await this.store.getSessionById(this.id)
+    session['_flash'][key] = value
+    await this.store.persistSessionData(this.id, session)
   }
 }

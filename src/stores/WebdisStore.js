@@ -24,25 +24,7 @@ export default class WebdisStore {
     }))
   }
 
-  async getSessionVariable(sessionId, variableKey) {
-    const session = await this.getSessionById(sessionId)
-    
-    if (session.hasOwnProperty(variableKey)) {
-      return session[variableKey]
-    } else {
-      return session['_flash'][variableKey]
-    }
-  }
-
-  async setSessionVariable(sessionId, variableKey, variableValue) {
-    const session = await this.getSessionById(sessionId)
-    session[variableKey] = variableValue
-    await fetch(this.url + '/SET/' + this.keyPrefix + sessionId + '/' + encodeURI(JSON.stringify(session)))
-  }
-
-  async flashSessionVariable(sessionId, variableKey, variableValue) {
-    const session = await this.getSessionById(sessionId)
-    session['_flash'][variableKey] = variableValue
-    await fetch(this.url + '/SET/' + this.keyPrefix + sessionId + '/' + encodeURI(JSON.stringify(session)))
+  async persistSessionData(sessionId, sessionData) {
+    await fetch(this.url + '/SET/' + this.keyPrefix + sessionId + '/' + encodeURI(JSON.stringify(sessionData)))
   }
 }

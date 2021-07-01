@@ -1,9 +1,25 @@
 import { Application, Router } from "https://deno.land/x/oak/mod.ts"
-import { OakSession } from '../mod.ts'
+import { OakSession, RedisStore, SqliteStore, WebdisStore, MemoryStore } from '../mod.ts'
 
 const app = new Application()
 
-new OakSession(app)
+// const store = new MemoryStore
+
+// const store = new SqliteStore({
+//     path: './database.db'
+// })
+
+// const store = new RedisStore({
+//     host: '0.0.0.0',
+//     port: 6379,
+// })
+// await store.init()
+
+// const store = new WebdisStore({
+//     url: 'http://127.0.0.1:7379'
+// })
+
+new OakSession(app, store)
 
 const router = new Router();
 

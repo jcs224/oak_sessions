@@ -34,31 +34,9 @@ export default class SqliteStore {
     })]);
   }
 
-  getSessionVariable(sessionId, variableKey) {
-    const session = this.getSessionById(sessionId)
-    
-    if (session.hasOwnProperty(variableKey)) {
-      return session[variableKey]
-    } else {
-      return session['_flash'][variableKey]
-    }
-  }
-
-  setSessionVariable(sessionId, variableKey, variableValue) {
-    const session = this.getSessionById(sessionId);
-		session[variableKey] = variableValue
-		
-		this.db.query(`UPDATE ${this.tableName} SET data = ? WHERE id = ?`, [
-      JSON.stringify(session), sessionId
-    ]);
-  }
-
-  flashSessionVariable(sessionId, variableKey, variableValue) {
-    const session = this.getSessionById(sessionId);
-		session['_flash'][variableKey] = variableValue
-		
-		this.db.query(`UPDATE ${this.tableName} SET data = ? WHERE id = ?`, [
-      JSON.stringify(session), sessionId
+  persistSessionData(sessionId, sessionData) {
+    this.db.query(`UPDATE ${this.tableName} SET data = ? WHERE id = ?`, [
+      JSON.stringify(sessionData), sessionId
     ]);
   }
 }

@@ -1,4 +1,4 @@
-import { connect } from 'https://deno.land/x/redis@v0.22.0/mod.ts'
+import { connect } from 'https://deno.land/x/redis@v0.22.2/mod.ts'
 
 export default class RedisStore {
   constructor(options) {
@@ -31,27 +31,7 @@ export default class RedisStore {
     }))
   }
 
-  async getSessionVariable(sessionId, variableKey) {
-    const session = await this.getSessionById(sessionId)
-    
-    if (session.hasOwnProperty(variableKey)) {
-      return session[variableKey]
-    } else {
-      return session['_flash'][variableKey]
-    }
-  }
-
-  async setSessionVariable(sessionId, variableKey, variableValue) {
-    const session = await this.getSessionById(sessionId)
-    session[variableKey] = variableValue
-
-    await this.db.set(this.keyPrefix + sessionId, JSON.stringify(session))
-  }
-
-  async flashSessionVariable(sessionId, variableKey, variableValue) {
-    const session = await this.getSessionById(sessionId)
-    session['_flash'][variableKey] = variableValue
-
-    await this.db.set(this.keyPrefix + sessionId, JSON.stringify(session))
+  async persistSessionData(sessionId, sessionData) {
+    await this.db.set(this.keyPrefix + sessionId, JSON.stringify(sessionData))
   }
 }
