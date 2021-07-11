@@ -42,4 +42,18 @@ export default class Session {
     session['_flash'][key] = value
     await this.store.persistSessionData(this.id, session)
   }
+
+  async has(key) {
+    const session = await this.store.getSessionById(this.id)
+
+    if (session.hasOwnProperty(key)) {
+      return true
+    } else {
+      if (session['_flash'].hasOwnProperty(key)) {
+        return true
+      } else {
+        return false
+      }
+    }
+  }
 }

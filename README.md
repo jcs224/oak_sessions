@@ -31,7 +31,7 @@ const router = new Router();
 router.get("/", async (context) => {
 
     // Examples of getting and setting variables on a session
-    if (await context.state.session.get("pageCount") === undefined) {
+    if (!await context.state.session.has("pageCount")) {
         await context.state.session.set("pageCount", 0);
 
     } else {
@@ -67,7 +67,7 @@ const session = new OpineSession(app, {}, store)
 
 app.use("/", async (req, res) => {
   // Examples of getting and setting variables on a session
-  if (await req.session.get("pageCount") !== undefined) {
+  if (await req.session.has("pageCount")) {
     await req.session.set("pageCount", await req.session.get("pageCount") + 1);
   } else {
     await req.session.set("pageCount", 0);
