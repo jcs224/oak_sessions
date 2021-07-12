@@ -7,36 +7,23 @@ import { decodeString } from 'https://deno.land/std@0.100.0/encoding/hex.ts'
 export default class Session {
   constructor (oakApp, store = null, encryptionKey = null) {
     this.store = store || new MemoryStore
+    this.encryptionKey = encryptionKey
 
     oakApp.use(async (ctx, next) => {
       let sid = ctx.cookies.get('session')
 
-      if (sid) {
-        if (encryptionKey) {
-          const aes = new AES(encryptionKey, {
-            mode: 'cbc',
-            iv: sid.substring(0, 16)
-          })
+      if (sid && this.encryptionKey) {
+        sid = await this._decryptSessionID(sid)
+      }
 
-          const cipher = decodeString(sid.substring(16))
-          const plain = await aes.decrypt(cipher)
-          sid = plain.toString()
-        }
-
-        if (await this.sessionExists(sid)) {
-          ctx.state.session = this.getSession(sid)
-        }
+      if (sid && await this.sessionExists(sid)) {
+        ctx.state.session = this.getSession(sid)
       } else {
         ctx.state.session = await this.createSession()
 
         if (encryptionKey) {
-          const randomIV = randomstring.generate(16)
-          const aes = new AES(encryptionKey, {
-            mode: 'cbc',
-            iv: randomIV
-          })
-          const cipher = await aes.encrypt(ctx.state.session.id)
-          ctx.cookies.set('session', randomIV + cipher.hex())
+          const encryptedID = await this._encryptSessionID(ctx.state.session.id)
+          ctx.cookies.set('session', encryptedID)
         } else {
           ctx.cookies.set('session', ctx.state.session.id)
         }
@@ -46,6 +33,27 @@ export default class Session {
 
       await next();
     })
+  }
+
+  async _encryptSessionID(id) {
+    const randomIV = randomstring.generate(16)
+    const aes = new AES(this.encryptionKey, {
+      mode: 'cbc',
+      iv: randomIV
+    })
+    const cipher = await aes.encrypt(id)
+    return randomIV + cipher.hex()
+  }
+
+  async _decryptSessionID(id) {
+    const aes = new AES(this.encryptionKey, {
+      mode: 'cbc',
+      iv: id.substring(0, 16)
+    })
+
+    const cipher = decodeString(id.substring(16))
+    const plain = await aes.decrypt(cipher)
+    return plain.toString()
   }
 
   async sessionExists(id) {
