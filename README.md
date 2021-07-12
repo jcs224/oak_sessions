@@ -1,13 +1,6 @@
-# Deno Sessions
+# Oak Sessions
 
-Sessions adds the ability to use sessions with the Oak framework.
-
-You can specify the storage layer used to store session data. Here are the supported storage layers:
-
-* **Memory**: Stores all session data within memory. Good for debugging and testing, but should not be used in production.
-* **SQLite**: Uses a SQLite database to store session data. Internally, the deno [sqlite](https://deno.land/x/sqlite) library is used to interact with a SQLite database. Requires filesystem access.
-* **Redis**: Uses a Redis database to store session data. Internally, the deno [redis](https://deno.land/x/redis) library is used to interact with a Redis database. Requires a separate Redis server.
-* **Webdis**: Uses a Webdis endpoint to store session data. Webdis is a Redis server which allows you to use Redis with an HTTP endpoint. This is ideal for serverless environments, or anywhere that only HTTP endpoints can be accessed (such as Deno Deploy). Requires a Webdis URL.
+Use cookie-based web sessions with the Oak framework.
 
 ## Usage
 
@@ -44,7 +37,15 @@ await app.listen({ port: 8000 });
 ```
 
 ## Storage
-By default, `MemoryStorage` is the storage driver, but you can (and should in production) use a more robust and persistent storage driver. Here are some options:
+
+You can specify the storage layer used to store session data. Here are the supported storage layers:
+
+* **Memory**: Stores all session data within memory. Good for debugging and testing, but should not be used in production.
+* **SQLite**: Uses a SQLite database to store session data. Internally, the deno [sqlite](https://deno.land/x/sqlite) library is used to interact with a SQLite database. Requires filesystem access.
+* **Redis**: Uses a Redis database to store session data. Internally, the deno [redis](https://deno.land/x/redis) library is used to interact with a Redis database. Requires a separate Redis server.
+* **Webdis**: Uses a Webdis endpoint to store session data. Webdis is a Redis server which allows you to use Redis with an HTTP endpoint. This is ideal for serverless environments, or anywhere that only HTTP endpoints can be accessed (such as Deno Deploy). Requires a Webdis URL.
+
+By default, `MemoryStorage` is the storage driver, but you can (and should in production) use a more robust and persistent storage driver.
 
 ### SQLite
 ```ts
