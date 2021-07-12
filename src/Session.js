@@ -2,8 +2,23 @@ import { v4 } from "https://deno.land/std@0.93.0/uuid/mod.ts"
 import MemoryStore from './stores/MemoryStore.js'
 
 export default class Session {
-  constructor (store = null) {
+  constructor (oakApp, store = null) {
     this.store = store || new MemoryStore
+
+    oakApp.use(async (ctx, next) => {
+      const sid = ctx.cookies.get('sid')
+
+      if (sid && await this.sessionExists(sid)) {
+        ctx.state.session = this.getSession(sid)
+      } else {
+        ctx.state.session = await this.createSession()
+        ctx.cookies.set('sid', ctx.state.session.id)
+      }
+
+      ctx.state.session.set('_flash', {})
+
+      await next();
+    })
   }
 
   async sessionExists(id) {

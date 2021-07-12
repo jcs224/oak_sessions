@@ -1,11 +1,8 @@
 # Deno Sessions
 
-Sessions adds the ability to use sessions with deno web frameworks. It currently supports the following frameworks:
+Sessions adds the ability to use sessions with the Oak framework.
 
-* [**Oak**](https://deno.land/x/oak)
-* [**Opine**](https://deno.land/x/opine)
-
-You can also specify the storage layer used to store session data. Here are the supported storage layers:
+You can specify the storage layer used to store session data. Here are the supported storage layers:
 
 * **Memory**: Stores all session data within memory. Good for debugging and testing, but should not be used in production.
 * **SQLite**: Uses a SQLite database to store session data. Internally, the deno [sqlite](https://deno.land/x/sqlite) library is used to interact with a SQLite database. Requires filesystem access.
@@ -14,18 +11,14 @@ You can also specify the storage layer used to store session data. Here are the 
 
 ## Usage
 
-Here are some examples with various web frameworks:
-
-### Oak
 ```ts
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
-import { OakSession } from "https://deno.land/x/sessions/mod.ts";
+import { Session } from "https://deno.land/x/sessions/mod.ts";
 
 const app = new Application();
 
 // Attach sessions to middleware
-const session = new OakSession(app);
-
+const session = new Session(app);
 const router = new Router();
 
 router.get("/", async (context) => {
@@ -50,42 +43,13 @@ app.use(router.allowedMethods());
 await app.listen({ port: 8000 });
 ```
 
-### Opine (with Redis storage)
-```ts
-import { opine } from "https://deno.land/x/opine/mod.ts";
-import { OpineSession, RedisStore } from '../session-2/mod.ts'
-
-const app = new opine()
-const store = new RedisStore({
-  host: '0.0.0.0',
-  port: 6379
-})
-
-await store.init()
-
-const session = new OpineSession(app, {}, store)
-
-app.use("/", async (req, res) => {
-  // Examples of getting and setting variables on a session
-  if (await req.session.has("pageCount")) {
-    await req.session.set("pageCount", await req.session.get("pageCount") + 1);
-  } else {
-    await req.session.set("pageCount", 0);
-  }
-
-  res.setStatus(200).send(`Visited page ${await req.session.get("pageCount")} times`)
-});
-
-app.listen(8002, () => console.log("Server at http://localhost:8080"));
-```
-
 ## Storage
 By default, `MemoryStorage` is the storage driver, but you can (and should in production) use a more robust and persistent storage driver. Here are some options:
 
 ### SQLite
 ```ts
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
-import { OakSession, SqliteStore } from "https://deno.land/x/sessions/mod.ts";
+import { Session, SqliteStore } from "https://deno.land/x/sessions/mod.ts";
 
 const app = new Application();
 const store = new SqliteStore({
@@ -94,7 +58,7 @@ const store = new SqliteStore({
 })
 
 // Attach sessions to middleware
-const session = new OakSession(app, store);
+const session = new Session(app, store);
 
 // ...
 ```
@@ -102,7 +66,7 @@ const session = new OakSession(app, store);
 ### Redis
 ```ts
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
-import { OakSession, RedisStore } from "https://deno.land/x/sessions/mod.ts";
+import { Session, RedisStore } from "https://deno.land/x/sessions/mod.ts";
 
 const app = new Application();
 const store = new RedisStore({
@@ -114,7 +78,7 @@ const store = new RedisStore({
 await store.init();
 
 // Attach sessions to middleware
-const session = new OakSession(app, store);
+const session = new Session(app, store);
 
 // ...
 ```
@@ -122,7 +86,7 @@ const session = new OakSession(app, store);
 ### Webdis
 ```ts
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
-import { OakSession, WebdisStore } from "https://deno.land/x/sessions/mod.ts";
+import { Session, WebdisStore } from "https://deno.land/x/sessions/mod.ts";
 
 const app = new Application();
 const store = new WebdisStore({
@@ -130,7 +94,7 @@ const store = new WebdisStore({
 });
 
 // Attach sessions to middleware
-const session = new OakSession(app, store);
+const session = new Session(app, store);
 
 // ...
 ```

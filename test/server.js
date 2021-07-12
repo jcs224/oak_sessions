@@ -1,5 +1,5 @@
 import { Application, Router } from "https://deno.land/x/oak/mod.ts"
-import { OakSession, RedisStore, SqliteStore, WebdisStore, MemoryStore } from '../mod.ts'
+import { Session, RedisStore, SqliteStore, WebdisStore, MemoryStore } from '../mod.ts'
 
 const app = new Application()
 
@@ -19,7 +19,7 @@ const store = new MemoryStore
 //     url: 'http://127.0.0.1:7379'
 // })
 
-new OakSession(app, store)
+new Session(app, store)
 
 const router = new Router();
 
