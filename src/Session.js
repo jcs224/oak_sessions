@@ -9,7 +9,7 @@ export default class Session {
     this.store = store || new MemoryStore
 
     oakApp.use(async (ctx, next) => {
-      let sid = ctx.cookies.get('sid')
+      let sid = ctx.cookies.get('session')
 
       if (sid) {
         if (encryptionKey) {
@@ -36,9 +36,9 @@ export default class Session {
             iv: randomIV
           })
           const cipher = await aes.encrypt(ctx.state.session.id)
-          ctx.cookies.set('sid', randomIV + cipher.hex())
+          ctx.cookies.set('session', randomIV + cipher.hex())
         } else {
-          ctx.cookies.set('sid', ctx.state.session.id)
+          ctx.cookies.set('session', ctx.state.session.id)
         }
       }
 
