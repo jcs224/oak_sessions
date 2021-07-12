@@ -1,18 +1,45 @@
 import { v4 } from "https://deno.land/std@0.93.0/uuid/mod.ts"
 import MemoryStore from './stores/MemoryStore.js'
+import { AES } from 'https://deno.land/x/god_crypto@v1.4.10/aes.ts'
+import randomstring from 'https://esm.sh/randomstring@1.2.1'
+import { decodeString } from 'https://deno.land/std@0.100.0/encoding/hex.ts'
 
 export default class Session {
-  constructor (oakApp, store = null) {
+  constructor (oakApp, store = null, encryptionKey = null) {
     this.store = store || new MemoryStore
 
     oakApp.use(async (ctx, next) => {
-      const sid = ctx.cookies.get('sid')
+      let sid = ctx.cookies.get('sid')
 
-      if (sid && await this.sessionExists(sid)) {
-        ctx.state.session = this.getSession(sid)
+      if (sid) {
+        if (encryptionKey) {
+          const aes = new AES(encryptionKey, {
+            mode: 'cbc',
+            iv: sid.substring(0, 16)
+          })
+
+          const cipher = decodeString(sid.substring(16))
+          const plain = await aes.decrypt(cipher)
+          sid = plain.toString()
+        }
+
+        if (await this.sessionExists(sid)) {
+          ctx.state.session = this.getSession(sid)
+        }
       } else {
         ctx.state.session = await this.createSession()
-        ctx.cookies.set('sid', ctx.state.session.id)
+
+        if (encryptionKey) {
+          const randomIV = randomstring.generate(16)
+          const aes = new AES(encryptionKey, {
+            mode: 'cbc',
+            iv: randomIV
+          })
+          const cipher = await aes.encrypt(ctx.state.session.id)
+          ctx.cookies.set('sid', randomIV + cipher.hex())
+        } else {
+          ctx.cookies.set('sid', ctx.state.session.id)
+        }
       }
 
       ctx.state.session.set('_flash', {})

@@ -19,7 +19,7 @@ const store = new MemoryStore
 //     url: 'http://127.0.0.1:7379'
 // })
 
-new Session(app, store)
+new Session(app, store, 'asdfasdfasdfasdf')
 
 const router = new Router();
 
