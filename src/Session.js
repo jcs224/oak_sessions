@@ -1,7 +1,7 @@
 import { v4 } from "https://deno.land/std@0.93.0/uuid/mod.ts"
 import MemoryStore from './stores/MemoryStore.js'
 import { AES } from 'https://deno.land/x/god_crypto@v1.4.10/aes.ts'
-import randomstring from 'https://esm.sh/randomstring@1.2.1'
+import randomstring from 'https://jspm.dev/randomstring@1.2.1'
 import { decodeString } from 'https://deno.land/std@0.100.0/encoding/hex.ts'
 
 export default class Session {
