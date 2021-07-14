@@ -31,6 +31,10 @@ export default class RedisStore {
     }))
   }
 
+  async deleteSession(sessionId) {
+    await this.db.del(this.keyPrefix + sessionId)
+  }
+
   async persistSessionData(sessionId, sessionData) {
     await this.db.set(this.keyPrefix + sessionId, JSON.stringify(sessionData))
   }

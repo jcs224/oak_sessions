@@ -17,6 +17,10 @@ export default class MemoryStore {
     })
   }
 
+  deleteSession(sessionId) {
+    this.data.delete(sessionId)
+  }
+
   persistSessionData(sessionId, sessionData) {
     this.data.set(sessionId, sessionData)
   }

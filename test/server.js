@@ -23,7 +23,16 @@ new Session(app, store, 'asdfasdfasdfasdf')
 
 const router = new Router();
 
-router.get("/", async (context) => {
+router.post('/delete', async (ctx) => {
+    await ctx.state.session.deleteSession()
+
+    ctx.response.body = `
+    <body>
+        Session deleted.<br>
+        <a href="/" >Go back home</a>
+    </body>
+    `
+}).get("/", async (context) => {
     // Examples of getting and setting variables on a session
     if (await context.state.session.has("pageCount")) {
         await context.state.session.set("pageCount", await context.state.session.get("pageCount") + 1);
@@ -32,18 +41,19 @@ router.get("/", async (context) => {
     }
 
     if ((await context.state.session.get('pageCount')) % 3 == 0) {
-        await context.state.session.flash('message', 'FLASH!')
-        console.log(await context.state.session.get('message'))
-    }
-
-    if (await context.state.session.has('message')) {
-        console.log('there is flash data')
-    } else {
-        console.log('no flash data')
+        await context.state.session.flash('message', 'FLASH!!')
     }
     
-    context.response.body = `Visited page ${await context.state.session.get("pageCount")} times!`;
-});
+    context.response.body = `
+    <body>
+        Visited page ${await context.state.session.get("pageCount")} times!</br>
+        ${await context.state.session.has('message') ? await context.state.session.get('message') : ''}
+        <form action="/delete" method="post">
+        <input type="hidden" name="_deleteSession" value="true" />
+        <button type="submit">Delete Session</button>
+        </form>
+    </body>`;
+})
 
 app.use(router.routes());
 app.use(router.allowedMethods());

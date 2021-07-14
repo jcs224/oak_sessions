@@ -24,6 +24,10 @@ export default class WebdisStore {
     }))
   }
 
+  async deleteSession(sessionId) {
+    await fetch(this.url + '/DEL/' + this.keyPrefix + sessionId)
+  }
+
   async persistSessionData(sessionId, sessionData) {
     await fetch(this.url + '/SET/' + this.keyPrefix + sessionId + '/' + encodeURI(JSON.stringify(sessionData)))
   }

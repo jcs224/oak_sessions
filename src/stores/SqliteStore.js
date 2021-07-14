@@ -34,6 +34,10 @@ export default class SqliteStore {
     })]);
   }
 
+  deleteSession(sessionId) {
+    this.db.query(`DELETE FROM ${this.tableName} WHERE id = ?`, [sessionId])
+  }
+
   persistSessionData(sessionId, sessionData) {
     this.db.query(`UPDATE ${this.tableName} SET data = ? WHERE id = ?`, [
       JSON.stringify(sessionData), sessionId

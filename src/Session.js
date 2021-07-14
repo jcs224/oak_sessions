@@ -3,6 +3,7 @@ import MemoryStore from './stores/MemoryStore.js'
 import { AES } from 'https://deno.land/x/god_crypto@v1.4.10/aes.ts'
 import randomstring from 'https://jspm.dev/randomstring@1.2.1'
 import { decodeString } from 'https://deno.land/std@0.100.0/encoding/hex.ts'
+import { parseFormParams } from "./Helpers.js"
 
 export default class Session {
   constructor (oakApp, store = null, encryptionKey = null) {
@@ -10,28 +11,32 @@ export default class Session {
     this.encryptionKey = encryptionKey
 
     oakApp.use(async (ctx, next) => {
-      let sid = ctx.cookies.get('session')
+      const params = await parseFormParams(ctx)
 
-      if (sid && this.encryptionKey) {
-        sid = await this._decryptSessionID(sid)
-      }
+      if (params.get('_deleteSession') !== 'true') {
+        let sid = ctx.cookies.get('session')
 
-      if (sid && await this.sessionExists(sid)) {
-        ctx.state.session = this.getSession(sid)
-      } else {
-        ctx.state.session = await this.createSession()
-
-        if (encryptionKey) {
-          const encryptedID = await this._encryptSessionID(ctx.state.session.id)
-          ctx.cookies.set('session', encryptedID)
-        } else {
-          ctx.cookies.set('session', ctx.state.session.id)
+        if (sid && this.encryptionKey) {
+          sid = await this._decryptSessionID(sid)
         }
+
+        if (sid && await this.sessionExists(sid)) {
+          ctx.state.session = this.getSession(sid)
+        } else {
+          ctx.state.session = await this.createSession()
+
+          if (encryptionKey) {
+            const encryptedID = await this._encryptSessionID(ctx.state.session.id)
+            ctx.cookies.set('session', encryptedID)
+          } else {
+            ctx.cookies.set('session', ctx.state.session.id)
+          }
+        }
+
+        ctx.state.session.set('_flash', {})
       }
 
-      ctx.state.session.set('_flash', {})
-
-      await next();
+      await next()
     })
   }
 
@@ -69,6 +74,10 @@ export default class Session {
   getSession(id) {
     this.id = id
     return this
+  }
+
+  async deleteSession() {
+    await this.store.deleteSession(this.id)
   }
 
   async get(key) {
