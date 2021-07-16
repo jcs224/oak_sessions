@@ -12,7 +12,7 @@ export default class Session {
     oakApp.use(async (ctx, next) => {
       const params = await parseFormParams(ctx)
 
-      if (params.get('_deleteSession') !== 'true') {
+      if (params.get('_skipSession') !== 'true') {
         const sid = ctx.cookies.get('session')
 
         if (sid && await this.sessionExists(sid)) {
