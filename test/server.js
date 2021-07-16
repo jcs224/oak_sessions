@@ -26,12 +26,7 @@ const router = new Router();
 router.post('/delete', async (ctx) => {
     await ctx.state.session.deleteSession()
 
-    ctx.response.body = `
-    <body>
-        Session deleted.<br>
-        <a href="/" >Go back home</a>
-    </body>
-    `
+    ctx.response.redirect('/')
 }).get("/", async (context) => {
     // Examples of getting and setting variables on a session
     if (await context.state.session.has("pageCount")) {
