@@ -10,24 +10,25 @@ import { Session } from "https://deno.land/x/sessions/mod.ts";
 
 const app = new Application();
 
-// Attach sessions to middleware
-const session = new Session(app);
+// Instantiate session
+const session = new Session();
 const router = new Router();
 
-router.get("/", async (context) => {
+// Include the session.initMiddleware on the routes you want to use sessions for
+router.get("/", session.initMiddleware(), async (ctx) => {
 
     // Examples of getting and setting variables on a session
-    if (!await context.state.session.has("pageCount")) {
-        await context.state.session.set("pageCount", 0);
+    if (!await ctx.session.has("pageCount")) {
+        await ctx.session.set("pageCount", 0);
 
     } else {
-        await context.state.session.set("pageCount", await context.state.session.get("pageCount") + 1);
+        await ctx.session.set("pageCount", await ctx.session.get("pageCount") + 1);
     }
 
     // If you only want a variable to survive for a single request, you can "flash" it instead
-    await context.state.session.flash("message", "I am good for form validations errors, success messages, etc.")
+    await ctx.session.flash("message", "I am good for form validations errors, success messages, etc.")
     
-    context.response.body = `Visited page ${await context.state.session.get("pageCount")} times`;
+    ctx.response.body = `Visited page ${await ctx.session.get("pageCount")} times`;
 });
 
 app.use(router.routes());
@@ -59,7 +60,7 @@ const store = new SqliteStore({
 })
 
 // Attach sessions to middleware
-const session = new Session(app, store);
+const session = new Session(store);
 
 // ...
 ```
@@ -79,7 +80,7 @@ const store = new RedisStore({
 await store.init();
 
 // Attach sessions to middleware
-const session = new Session(app, store);
+const session = new Session(store);
 
 // ...
 ```
@@ -95,7 +96,7 @@ const store = new WebdisStore({
 });
 
 // Attach sessions to middleware
-const session = new Session(app, store);
+const session = new Session(store);
 
 // ...
 ```
