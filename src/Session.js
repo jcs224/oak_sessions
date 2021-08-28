@@ -1,4 +1,5 @@
 import { nanoid } from 'https://deno.land/x/nanoid@v3.0.0/async.ts'
+import CryptoJS from 'https://cdn.skypack.dev/crypto-js@4.1.1';
 import MemoryStore from './stores/MemoryStore.js'
 import CookieStore from './stores/CookieStore.js'
 
@@ -11,9 +12,17 @@ export default class Session {
     return async (ctx, next) => {
 
       if (this.store instanceof CookieStore) {
-        this.store.data = ctx.cookies.get('session_data') 
-          ? JSON.parse(ctx.cookies.get('session_data')) 
-          : {}
+        if (ctx.cookies.get('session_data')) {
+          if (this.store.encryptionKey) {
+            let bytes = CryptoJS.AES.decrypt(ctx.cookies.get('session_data'), this.store.encryptionKey)
+            let decryptedCookie = bytes.toString(CryptoJS.enc.Utf8)
+            this.store.data = JSON.parse(decryptedCookie)
+          } else {
+            this.store.data = JSON.parse(ctx.cookies.get('session_data'))
+          }
+        } else {
+          this.store.data = {}
+        }
 
         this.store.data['_flash'] = {}
 
@@ -34,7 +43,12 @@ export default class Session {
       await next()
 
       if (this.store instanceof CookieStore) {
-        ctx.cookies.set('session_data', JSON.stringify(this.store.data))
+        if (this.store.encryptionKey) {
+          let cipherText = CryptoJS.AES.encrypt(JSON.stringify(this.store.data), this.store.encryptionKey).toString()
+          ctx.cookies.set('session_data', cipherText)
+        } else {
+          ctx.cookies.set('session_data', JSON.stringify(this.store.data))
+        }
       }
     }
   }

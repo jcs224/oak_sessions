@@ -1,5 +1,6 @@
 export default class CookieStore {
-  constructor() {
+  constructor(encryptionKey = null) {
     this.data = {}
+    this.encryptionKey = encryptionKey
   }
 }

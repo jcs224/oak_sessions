@@ -9,7 +9,7 @@ app.addEventListener('error', (evt) => {
 
 // const store = new MemoryStore
 
-const store = new CookieStore
+const store = new CookieStore('a-secret-key')
 
 // const store = new SqliteStore({
 //     path: './database.db'
