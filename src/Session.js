@@ -1,5 +1,6 @@
 import { nanoid } from 'https://deno.land/x/nanoid@v3.0.0/async.ts'
 import MemoryStore from './stores/MemoryStore.js'
+import CookieStore from './stores/CookieStore.js'
 
 export default class Session {
   constructor (store = null) {
@@ -8,18 +9,33 @@ export default class Session {
 
   initMiddleware() {
     return async (ctx, next) => {
-      const sid = ctx.cookies.get('session')
 
-      if (sid && await this.sessionExists(sid)) {
-        ctx.session = this.getSession(sid)
+      if (this.store instanceof CookieStore) {
+        this.store.data = ctx.cookies.get('session_data') 
+          ? JSON.parse(ctx.cookies.get('session_data')) 
+          : {}
+
+        this.store.data['_flash'] = {}
+
+        ctx.session = this
       } else {
-        ctx.session = await this.createSession()
-        ctx.cookies.set('session', ctx.session.id)
+        const sid = ctx.cookies.get('session')
+
+        if (sid && await this.sessionExists(sid)) {
+          ctx.session = this.getSession(sid)
+        } else {
+          ctx.session = await this.createSession()
+          ctx.cookies.set('session', ctx.session.id)
+        }
+
+        ctx.session.set('_flash', {})
       }
 
-      ctx.session.set('_flash', {})
-
       await next()
+
+      if (this.store instanceof CookieStore) {
+        ctx.cookies.set('session_data', JSON.stringify(this.store.data))
+      }
     }
   }
 
@@ -38,12 +54,14 @@ export default class Session {
     return this
   }
 
-  async deleteSession(id) {
-    await this.store.deleteSession(id)
+  async deleteSession(oakContext) {
+    this.store instanceof CookieStore ? oakContext.cookies.delete('session_data') : await this.store.deleteSession(oakContext.cookies.get('session'))
   }
 
   async get(key) {
-    const session = await this.store.getSessionById(this.id)
+    const session = this.store instanceof CookieStore 
+      ? this.store.data 
+      : await this.store.getSessionById(this.id)
 
     if (session.hasOwnProperty(key)) {
       return session[key]
@@ -53,19 +71,33 @@ export default class Session {
   }
 
   async set(key, value) {
-    const session = await this.store.getSessionById(this.id)
+    const session = this.store instanceof CookieStore 
+      ? this.store.data 
+      : await this.store.getSessionById(this.id)
+
     session[key] = value
-    await this.store.persistSessionData(this.id, session)
+
+    await this.store instanceof CookieStore 
+      ? this.store.data = session 
+      : this.store.persistSessionData(this.id, session)
   }
 
   async flash(key, value) {
-    const session = await this.store.getSessionById(this.id)
+    const session = this.store instanceof CookieStore 
+      ? this.store.data 
+      : await this.store.getSessionById(this.id)
+
     session['_flash'][key] = value
-    await this.store.persistSessionData(this.id, session)
+
+    await this.store instanceof CookieStore 
+      ? this.store.data = session 
+      : this.store.persistSessionData(this.id, session)
   }
 
   async has(key) {
-    const session = await this.store.getSessionById(this.id)
+    const session = this.store instanceof CookieStore 
+      ? this.store.data 
+      : await this.store.getSessionById(this.id)
 
     if (session.hasOwnProperty(key)) {
       return true

@@ -1,5 +1,5 @@
 import { Application, Router } from "https://deno.land/x/oak@v7.7.0/mod.ts"
-import { Session, RedisStore, SqliteStore, WebdisStore, MemoryStore } from '../mod.ts'
+import { Session, RedisStore, SqliteStore, WebdisStore, MemoryStore, CookieStore } from '../mod.ts'
 
 const app = new Application()
 
@@ -7,7 +7,9 @@ app.addEventListener('error', (evt) => {
     console.log(evt.error)
 })
 
-const store = new MemoryStore
+// const store = new MemoryStore
+
+const store = new CookieStore
 
 // const store = new SqliteStore({
 //     path: './database.db'
@@ -29,7 +31,7 @@ const session = new Session(store)
 // new Session(router, store)
 
 router.post('/delete', async (ctx) => {
-    await session.deleteSession(ctx.cookies.get('session'))
+    await session.deleteSession(ctx)
 
     ctx.response.redirect('/')
 }).get("/", session.initMiddleware(), async (context) => {
@@ -53,6 +55,8 @@ router.post('/delete', async (ctx) => {
         <button type="submit">Delete Session</button>
         </form>
     </body>`;
+
+    // context.response.body = 'lamesauce'
 })
 
 app.use(router.routes());
