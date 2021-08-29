@@ -15,7 +15,7 @@ const session = new Session();
 const router = new Router();
 
 // Include the session.initMiddleware on the routes you want to use sessions for
-router.get("/", session.initMiddleware(), async (ctx) => {
+router.get("/session", session.initMiddleware(), async (ctx) => {
 
     // Examples of getting and setting variables on a session
     if (!await ctx.session.has("pageCount")) {
@@ -29,6 +29,15 @@ router.get("/", session.initMiddleware(), async (ctx) => {
     await ctx.session.flash("message", "I am good for form validations errors, success messages, etc.")
     
     ctx.response.body = `Visited page ${await ctx.session.get("pageCount")} times`;
+})
+// When deleting a session, it's not recommended to do it with the session middleware in the route you perform the deletion.
+.post('/delete', async (ctx) => {
+    // Pass the router context as the parameter to deleteSession()
+    await session.deleteSession(ctx)
+    // Optionally, you can also just pass the string of the session ID in case you aren't within a routing context.
+    // await session.deleteSession(ctx.cookies.get('session'))
+
+    ctx.response.redirect('/')
 });
 
 app.use(router.routes());

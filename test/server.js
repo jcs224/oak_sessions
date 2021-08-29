@@ -30,13 +30,13 @@ const session = new Session(store)
 
 // new Session(router, store)
 
-router.use(session.initMiddleware())
-
 router.post('/delete', async (ctx) => {
-    await session.deleteSession()
+    await session.deleteSession(ctx)
 
     ctx.response.redirect('/')
-}).get("/", async (context) => {
+})
+
+.get("/", session.initMiddleware(), async (context) => {
     // Examples of getting and setting variables on a session
     if (await context.session.has("pageCount")) {
         await context.session.set("pageCount", await context.session.get("pageCount") + 1);

@@ -33,7 +33,7 @@ export default class CookieStore {
   }
 
   deleteSession(ctx) {
-    this.context.cookies.delete('session_data')
+    ctx.cookies.delete('session_data')
   }
 
   persistSessionData(id, sessionData) {

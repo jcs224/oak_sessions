@@ -49,8 +49,19 @@ export default class Session {
     return this
   }
 
-  async deleteSession() {
-    await this.store.deleteSession(this.id)
+  async deleteSession(sessionIdOrContext) {
+    if (typeof sessionIdOrContext == 'string') {
+      let sessionId = sessionIdOrContext
+      await this.store.deleteSession(sessionId)
+    } else {
+      let ctx = sessionIdOrContext
+      await this.store.deleteSession(
+        this.store instanceof CookieStore 
+        ? ctx 
+        : ctx.cookies.get('session')
+      )
+    }
+
     this.context.cookies.delete('session')
   }
 
