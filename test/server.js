@@ -1,5 +1,6 @@
 import { Application, Router } from "https://deno.land/x/oak@v7.7.0/mod.ts"
 import { Session, RedisStore, SqliteStore, WebdisStore, MemoryStore, CookieStore } from '../mod.ts'
+import { connect as connectRedis } from 'https://deno.land/x/redis@v0.22.2/mod.ts'
 
 const app = new Application()
 
@@ -9,12 +10,18 @@ app.addEventListener('error', (evt) => {
 
 // const store = new MemoryStore
 
-const store = new CookieStore('a-secret-key')
+// const store = new CookieStore('a-secret-key')
 
 // const store = new SqliteStore({
 //     path: './database.db'
 // })
 
+const redis = await connectRedis({
+    hostname: '0.0.0.0',
+    port: 6379
+})
+
+const store = new RedisStore(redis)
 // const store = new RedisStore({
 //     host: '0.0.0.0',
 //     port: 6379,

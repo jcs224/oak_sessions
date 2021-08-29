@@ -1,11 +1,9 @@
 import { connect } from 'https://deno.land/x/redis@v0.22.2/mod.ts'
 
 export default class RedisStore {
-  constructor(options) {
-    this.host = options.host
-    this.port = options.port
-    this.keyPrefix = 'session_'
-    this.db = null
+  constructor(db, keyPrefix = 'session_') {
+    this.keyPrefix = keyPrefix
+    this.db = db
   }
 
   async init() {

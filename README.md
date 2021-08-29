@@ -94,14 +94,19 @@ const session = new Session(store);
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Session, RedisStore } from "https://deno.land/x/oak_sessions/mod.ts";
 
-const app = new Application();
-const store = new RedisStore({
-    host: '127.0.0.1',
-    port: 6379
-});
+// import the Redis library
+import { connect as connectRedis } from 'https://deno.land/x/redis@v0.22.2/mod.ts'
 
-// Since Redis connection is async, must be initialized before used
-await store.init();
+const app = new Application();
+
+// Create a redis connection
+const redis = await connectRedis({
+    hostname: '0.0.0.0',
+    port: 6379
+})
+
+// pass redis connection into a new RedisStore. Optionally add a second string argument for a custom database prefix, default is 'session_'
+const store = new RedisStore(redis)
 
 // Attach sessions to middleware
 const session = new Session(store);
