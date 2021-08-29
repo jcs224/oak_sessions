@@ -10,23 +10,17 @@ app.addEventListener('error', (evt) => {
 
 // const store = new MemoryStore
 
-// const store = new CookieStore('a-secret-key')
+const store = new CookieStore('a-secret-key')
 
 // const store = new SqliteStore({
 //     path: './database.db'
 // })
 
-const redis = await connectRedis({
-    hostname: '0.0.0.0',
-    port: 6379
-})
-
-const store = new RedisStore(redis)
-// const store = new RedisStore({
-//     host: '0.0.0.0',
-//     port: 6379,
+// const redis = await connectRedis({
+//     hostname: '0.0.0.0',
+//     port: 6379
 // })
-// await store.init()
+// const store = new RedisStore(redis)
 
 // const store = new WebdisStore({
 //     url: 'http://127.0.0.1:7379'

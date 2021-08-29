@@ -12,10 +12,26 @@ export default class CookieStore {
     if (this.sessionExists()) {
       if (this.encryptionKey) {
         let bytes = CryptoJS.AES.decrypt(this.context.cookies.get('session_data'), this.encryptionKey)
-        let decryptedCookie = bytes.toString(CryptoJS.enc.Utf8)
-        this.data = JSON.parse(decryptedCookie)
+        let decryptedCookie = false
+        try {
+          decryptedCookie = bytes.toString(CryptoJS.enc.Utf8)
+        } catch (e) {
+          this.data = {}
+        }
+        
+        if (decryptedCookie) {
+          try {
+            this.data = JSON.parse(decryptedCookie)
+          } catch (e) {
+            this.data = {}
+          }
+        }
       } else {
-        this.data = JSON.parse(ctx.cookies.get('session_data'))
+        try {
+          this.data = JSON.parse(ctx.cookies.get('session_data'))
+        } catch (e) {
+          this.data = {}
+        }
       }
     }
   }
