@@ -1,10 +1,9 @@
 import { DB } from "https://deno.land/x/sqlite@v2.4.0/mod.ts";
 
 export default class SqliteStore {
-  constructor(options) {
-    this.db = new DB(options.path)
-    this.path = options.path
-    this.tableName = options.tableName || 'sessions'
+  constructor(db, tableName = 'sessions') {
+    this.db = db
+    this.tableName = tableName
     this.db.query(`CREATE TABLE IF NOT EXISTS ${this.tableName} (id TEXT, data TEXT)`)
   }
 
