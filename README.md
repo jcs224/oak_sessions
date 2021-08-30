@@ -51,7 +51,7 @@ await app.listen({ port: 8000 });
 You can specify the storage layer used to store session data. Here are the supported storage layers:
 
 * **Memory**: Stores all session data within memory. Good for debugging and testing, but should not be used in production.
-* **Cookie**: Stores all session data inside of an (optionally) encrypted cookie. The simplest implementation that doesn't require a backend and is suitable for production. The disadvantage is cookies can only store a pretty limited amount of data (about 4MB in most browsers) so only use if you don't need much session data.
+* **Cookie**: Stores all session data inside of an (optionally) encrypted cookie. The simplest implementation that doesn't require a backend and is suitable for production. The disadvantage is cookies can only store a pretty limited amount of data (about 4KB in most browsers) so only use if you don't need much session data.
 * **SQLite**: Uses a SQLite database to store session data. Internally, the deno [sqlite](https://deno.land/x/sqlite) library is used to interact with a SQLite database. Requires filesystem access.
 * **Redis**: Uses a Redis database to store session data. Internally, the deno [redis](https://deno.land/x/redis) library is used to interact with a Redis database. Requires a separate Redis server.
 * **Webdis**: Uses a Webdis endpoint to store session data. Webdis is a Redis server which allows you to use Redis with an HTTP endpoint. This is ideal for serverless environments, or anywhere that only HTTP endpoints can be accessed (such as Deno Deploy). Requires a Webdis URL.
