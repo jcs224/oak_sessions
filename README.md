@@ -76,14 +76,14 @@ const session = new Session(store);
 ```ts
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Session, SqliteStore } from "https://deno.land/x/oak_sessions/mod.ts";
+import { DB } from 'https://deno.land/x/sqlite@v2.4.0/mod.ts'
 
 const app = new Application();
-const store = new SqliteStore({
-    path: './database.db',
-    tableName: 'sessions' // optional
-})
+const sqlite = new DB('./database.db') 
+// Pass DB instance into a new SqliteStore. Optionally add a custom table name as second string argument, default is 'sessions'
+const store = new SqliteStore(sqlite, 'optional_custom_table_name')
 
-// Attach sessions to middleware
+// Attach sessions to middleware. 
 const session = new Session(store);
 
 // ...
@@ -95,12 +95,12 @@ import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Session, RedisStore } from "https://deno.land/x/oak_sessions/mod.ts";
 
 // import the Redis library
-import { connect as connectRedis } from 'https://deno.land/x/redis@v0.22.2/mod.ts'
+import { connect } from 'https://deno.land/x/redis@v0.22.2/mod.ts'
 
 const app = new Application();
 
 // Create a redis connection
-const redis = await connectRedis({
+const redis = await connect({
     hostname: '0.0.0.0',
     port: 6379
 })
