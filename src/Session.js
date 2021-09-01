@@ -15,7 +15,7 @@ export default class Session {
         this.store.insertSessionMiddlewareContext(ctx)
       }
 
-      const sid = ctx.cookies.get('session')
+      const sid = await ctx.cookies.get('session')
 
       if (sid && await this.sessionExists(sid)) {
         ctx.session = this.getSession(sid)

@@ -9,12 +9,12 @@ app.addEventListener('error', (evt) => {
     console.log(evt.error)
 })
 
-// const store = new MemoryStore
+const store = new MemoryStore
 
 // const store = new CookieStore('a-secret-key')
 
-const sqlite = new sqliteDB('./database.db')
-const store = new SqliteStore(sqlite)
+// const sqlite = new sqliteDB('./database.db')
+// const store = new SqliteStore(sqlite)
 
 // const redis = await connectRedis({
 //     hostname: '0.0.0.0',
