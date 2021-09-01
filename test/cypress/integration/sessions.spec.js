@@ -23,5 +23,10 @@ describe('Sessions Test', () => {
     cy.reload()
     .contains('5 times!')
     .should('not.contain', 'FLASH!!')
+
+    cy.get('button').click()
+    
+    cy.contains('0 times!')
+    .contains('FLASH!!')
   })
 })
