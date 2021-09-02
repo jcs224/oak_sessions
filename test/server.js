@@ -54,7 +54,6 @@ router.post('/delete', async (ctx) => {
         Visited page ${await context.session.get("pageCount")} times!</br>
         ${await context.session.has('message') ? await context.session.get('message') : ''}
         <form action="/delete" method="post">
-        <input type="hidden" name="_skipSession" value="true" />
         <button type="submit">Delete Session</button>
         </form>
     </body>`;
