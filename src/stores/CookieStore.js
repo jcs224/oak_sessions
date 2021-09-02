@@ -6,13 +6,15 @@ export default class CookieStore {
     this.encryptionKey = encryptionKey
   }
 
-  insertSessionMiddlewareContext(ctx) {
+  async insertSessionMiddlewareContext(ctx) {
     this.context = ctx
 
-    if (this.sessionExists()) {
+    if (await this.sessionExists()) {
       if (this.encryptionKey) {
-        let bytes = CryptoJS.AES.decrypt(this.context.cookies.get('session_data'), this.encryptionKey)
+        const rawString = await this.context.cookies.get('session_data')
+        let bytes = CryptoJS.AES.decrypt(rawString, this.encryptionKey)
         let decryptedCookie = false
+
         try {
           decryptedCookie = bytes.toString(CryptoJS.enc.Utf8)
         } catch (e) {
@@ -28,7 +30,7 @@ export default class CookieStore {
         }
       } else {
         try {
-          this.data = JSON.parse(ctx.cookies.get('session_data'))
+          this.data = JSON.parse(await ctx.cookies.get('session_data'))
         } catch (e) {
           this.data = {}
         }
@@ -36,8 +38,8 @@ export default class CookieStore {
     }
   }
 
-  sessionExists() {
-    return this.context.cookies.get('session_data')
+  async sessionExists() {
+    return await this.context.cookies.get('session_data')
   }
 
   getSessionById() {
@@ -48,20 +50,20 @@ export default class CookieStore {
     this.data = {}
   }
 
-  deleteSession(ctx) {
-    ctx.cookies.delete('session_data')
+  async deleteSession(ctx) {
+    await ctx.cookies.delete('session_data')
   }
 
   persistSessionData(id, sessionData) {
     this.data = sessionData
   }
 
-  afterMiddlewareHook() {
+  async afterMiddlewareHook() {
     if (this.encryptionKey) {
       let cipherText = CryptoJS.AES.encrypt(JSON.stringify(this.data), this.encryptionKey).toString()
-      this.context.cookies.set('session_data', cipherText)
+      await this.context.cookies.set('session_data', cipherText)
     } else {
-      this.context.cookies.set('session_data', JSON.stringify(this.data))
+      await this.context.cookies.set('session_data', JSON.stringify(this.data))
     }
   }
 }

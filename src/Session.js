@@ -12,7 +12,7 @@ export default class Session {
       this.context = ctx
 
       if (typeof this.store.insertSessionMiddlewareContext !== 'undefined') {
-        this.store.insertSessionMiddlewareContext(ctx)
+        await this.store.insertSessionMiddlewareContext(ctx)
       }
 
       const sid = await ctx.cookies.get('session')
@@ -21,15 +21,15 @@ export default class Session {
         ctx.session = this.getSession(sid)
       } else {
         ctx.session = await this.createSession()
-        ctx.cookies.set('session', ctx.session.id)
+        await ctx.cookies.set('session', ctx.session.id)
       }
 
-      ctx.session.set('_flash', {})
+      await ctx.session.set('_flash', {})
 
       await next()
 
       if (typeof this.store.afterMiddlewareHook !== 'undefined') {
-        this.store.afterMiddlewareHook()
+        await this.store.afterMiddlewareHook()
       }
     }
   }
@@ -58,11 +58,11 @@ export default class Session {
       await this.store.deleteSession(
         this.store instanceof CookieStore 
         ? ctx 
-        : ctx.cookies.get('session')
+        : await ctx.cookies.get('session')
       )
     }
 
-    this.context.cookies.delete('session')
+    await this.context.cookies.delete('session')
   }
 
   async get(key) {
