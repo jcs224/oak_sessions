@@ -1,2 +1,3 @@
 test/database.db
 node_modules
+.vscode
