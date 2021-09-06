@@ -5,7 +5,7 @@ import { Context } from 'https://deno.land/x/oak@v9.0.0/context.ts'
 import Store from './stores/Store.ts'
 
 interface SessionContext extends Context {
-  session: any
+  session: Session
 }
 
 export default class Session {
@@ -94,7 +94,7 @@ export default class Session {
     }
   }
 
-  async set(key : string, value : string | number) {
+  async set(key : string, value : unknown) {
     if (typeof this.id == 'string') {
       const session = await this.store.getSessionById(this.id)
 
@@ -104,7 +104,7 @@ export default class Session {
     } 
   }
 
-  async flash(key : string, value : string | number) {
+  async flash(key : string, value : unknown) {
     if (typeof this.id == 'string') {
       const session = await this.store.getSessionById(this.id)
 
