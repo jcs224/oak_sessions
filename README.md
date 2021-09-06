@@ -64,7 +64,7 @@ import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Session, CookieStore } from "https://deno.land/x/oak_sessions/mod.ts";
 
 const app = new Application();
-const store = new Cookiestore('very-secret-key')
+const store = new CookieStore('very-secret-key')
 
 // Attach sessions to middleware
 const session = new Session(store);
