@@ -1,13 +1,17 @@
 import { DB } from "https://deno.land/x/sqlite@v2.4.0/mod.ts";
+import Store from './Store.ts'
 
-export default class SqliteStore {
-  constructor(db, tableName = 'sessions') {
+export default class SqliteStore implements Store {
+  db: DB
+  tableName: string
+
+  constructor(db : DB, tableName = 'sessions') {
     this.db = db
     this.tableName = tableName
     this.db.query(`CREATE TABLE IF NOT EXISTS ${this.tableName} (id TEXT, data TEXT)`)
   }
 
-  sessionExists(sessionId) {
+  sessionExists(sessionId : string) {
     let session = ''
     
     for (const [sess] of this.db.query(`SELECT data FROM ${this.tableName} WHERE id = ?`, [sessionId])) {
@@ -17,7 +21,7 @@ export default class SqliteStore {
     return session ? true : false;
   }
 
-  getSessionById(sessionId) {
+  getSessionById(sessionId : string) {
     let session = ''
     
     for (const [sess] of this.db.query(`SELECT data FROM ${this.tableName} WHERE id = ?`, [sessionId])) {
@@ -27,17 +31,17 @@ export default class SqliteStore {
     return JSON.parse(session);
   }
 
-  createSession(sessionId) {
+  createSession(sessionId : string) {
     this.db.query(`INSERT INTO ${this.tableName} (id, data) VALUES (?, ?)`, [sessionId, JSON.stringify({
       '_flash': {}
     })]);
   }
 
-  deleteSession(sessionId) {
+  deleteSession(sessionId : string) {
     this.db.query(`DELETE FROM ${this.tableName} WHERE id = ?`, [sessionId])
   }
 
-  persistSessionData(sessionId, sessionData) {
+  persistSessionData(sessionId : string, sessionData : object) {
     this.db.query(`UPDATE ${this.tableName} SET data = ? WHERE id = ?`, [
       JSON.stringify(sessionData), sessionId
     ]);
