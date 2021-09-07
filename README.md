@@ -18,17 +18,17 @@ const router = new Router();
 router.get("/session", session.initMiddleware(), async (ctx) => {
 
     // Examples of getting and setting variables on a session
-    if (!await ctx.session.has("pageCount")) {
-        await ctx.session.set("pageCount", 0);
+    if (!await ctx.state.session.has("pageCount")) {
+        await ctx.state.session.set("pageCount", 0);
 
     } else {
-        await ctx.session.set("pageCount", await ctx.session.get("pageCount") + 1);
+        await ctx.state.session.set("pageCount", await ctx.state.session.get("pageCount") + 1);
     }
 
     // If you only want a variable to survive for a single request, you can "flash" it instead
-    await ctx.session.flash("message", "I am good for form validations errors, success messages, etc.")
+    await ctx.state.session.flash("message", "I am good for form validations errors, success messages, etc.")
     
-    ctx.response.body = `Visited page ${await ctx.session.get("pageCount")} times`;
+    ctx.response.body = `Visited page ${await ctx.state.session.get("pageCount")} times`;
 })
 // When deleting a session, it's not recommended to do it with the session middleware in the route you perform the deletion.
 .post('/delete', async (ctx) => {
