@@ -5,7 +5,7 @@ import { Context } from 'https://deno.land/x/oak@v9.0.0/context.ts'
 import Store from './stores/Store.ts'
 
 interface SessionContext extends Context {
-  session: Session
+  session?: Session
 }
 
 export default class Session {
@@ -37,6 +37,8 @@ export default class Session {
       }
 
       await ctx.session.set('_flash', {})
+
+      ctx.state.session = ctx.session
 
       await next()
 
