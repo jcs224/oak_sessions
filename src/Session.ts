@@ -4,10 +4,6 @@ import CookieStore from './stores/CookieStore.ts'
 import { Context } from 'https://deno.land/x/oak@v9.0.0/context.ts'
 import Store from './stores/Store.ts'
 
-interface SessionContext extends Context {
-  session?: Session
-}
-
 export default class Session {
   id: string | null
   store: Store
@@ -20,7 +16,7 @@ export default class Session {
   }
 
   initMiddleware() {
-    return async (ctx : SessionContext, next : () => Promise<unknown>) => {
+    return async (ctx : Context, next : () => Promise<unknown>) => {
       this.context = ctx
 
       if (typeof this.store.insertSessionMiddlewareContext !== 'undefined') {
@@ -30,15 +26,13 @@ export default class Session {
       const sid = await ctx.cookies.get('session')
 
       if (sid && await this.sessionExists(sid)) {
-        ctx.session = this.getSession(sid)
+        ctx.state.session = this.getSession(sid)
       } else {
-        ctx.session = await this.createSession()
-        await ctx.cookies.set('session', ctx.session.id)
+        ctx.state.session = await this.createSession()
+        await ctx.cookies.set('session', ctx.state.session.id)
       }
 
-      await ctx.session.set('_flash', {})
-
-      ctx.state.session = ctx.session
+      await ctx.state.session.set('_flash', {})
 
       await next()
 
