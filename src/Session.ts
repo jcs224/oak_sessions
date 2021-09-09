@@ -3,16 +3,22 @@ import MemoryStore from './stores/MemoryStore.ts'
 import CookieStore from './stores/CookieStore.ts'
 import { Context } from 'https://deno.land/x/oak@v9.0.0/context.ts'
 import Store from './stores/Store.ts'
+import { DateTime } from 'https://jspm.dev/luxon@2.0.2'
 
+interface SessionOptions {
+  expireAfterSeconds?: number
+}
 export default class Session {
   id: string | null
   store: Store
   context: Context | null
+  expiration: number
 
-  constructor (store : Store = new MemoryStore) {
+  constructor (store : Store = new MemoryStore, options? : SessionOptions) {
     this.id = null
     this.store = store
     this.context = null
+    this.expiration = options && options.expireAfterSeconds ? options.expireAfterSeconds : 900
   }
 
   initMiddleware() {
@@ -25,11 +31,26 @@ export default class Session {
 
       const sid = await ctx.cookies.get('session')
 
-      if (sid && await this.sessionExists(sid)) {
+      if (sid 
+        && await this.sessionExists(sid) 
+        && await this.sessionValid(sid)
+      ) {
         ctx.state.session = this.getSession(sid)
+        await ctx.state.session.reupSession(sid)
       } else {
+        if (sid 
+          && await this.sessionExists(sid)
+          && !await this.sessionValid(sid)
+        ) {
+          await this.deleteSession(sid)
+        }
+
         ctx.state.session = await this.createSession()
         await ctx.cookies.set('session', ctx.state.session.id)
+        await ctx.state.session.set(
+          '_expire', 
+          DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO()
+        )
       }
 
       await ctx.state.session.set('_flash', {})
@@ -44,6 +65,22 @@ export default class Session {
 
   async sessionExists(id : string) {
     return await this.store.sessionExists(id)
+  }
+
+  async sessionValid(id : string) {
+    const session = await this.store.getSessionById(id)
+
+    if (DateTime.now() < DateTime.fromISO(session._expire)) {
+      return true
+    } else {
+      return false
+    }
+  }
+
+  async reupSession(id : string) {
+    const session = await this.store.getSessionById(id)
+    session._expire = DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO()
+    await this.store.persistSessionData(id, session)
   }
 
   async createSession() {
