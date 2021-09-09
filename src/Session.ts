@@ -12,13 +12,13 @@ export default class Session {
   id: string | null
   store: Store
   context: Context | null
-  expiration: number
+  expiration: number | null
 
   constructor (store : Store = new MemoryStore, options? : SessionOptions) {
     this.id = null
     this.store = store
     this.context = null
-    this.expiration = options && options.expireAfterSeconds ? options.expireAfterSeconds : 900
+    this.expiration = options && options.expireAfterSeconds ? options.expireAfterSeconds : null
   }
 
   initMiddleware() {
@@ -49,7 +49,7 @@ export default class Session {
         await ctx.cookies.set('session', ctx.state.session.id)
         await ctx.state.session.set(
           '_expire', 
-          DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO()
+          this.expiration ? DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO() : null
         )
       }
 
@@ -70,16 +70,20 @@ export default class Session {
   async sessionValid(id : string) {
     const session = await this.store.getSessionById(id)
 
-    if (DateTime.now() < DateTime.fromISO(session._expire)) {
-      return true
+    if (this.expiration) {
+      if (DateTime.now() < DateTime.fromISO(session._expire)) {
+        return true
+      } else {
+        return false
+      }
     } else {
-      return false
+      return true
     }
   }
 
   async reupSession(id : string) {
     const session = await this.store.getSessionById(id)
-    session._expire = DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO()
+    session._expire = this.expiration ? DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO() : null
     await this.store.persistSessionData(id, session)
   }
 
