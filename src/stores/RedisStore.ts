@@ -1,7 +1,7 @@
 import Store from './Store.ts'
 import { Redis, Bulk } from 'https://deno.land/x/redis@v0.22.2/mod.ts'
 
-export default class RedisStore implements Store{
+export default class RedisStore implements Store {
   keyPrefix : string
   db : Redis
 
@@ -16,15 +16,19 @@ export default class RedisStore implements Store{
   }
 
   async getSessionById(sessionId : string) {
-    const sessionString : string = String(await this.db.get(this.keyPrefix + sessionId))
-    const value = JSON.parse(sessionString)
-    return value
+    const session = await this.db.get(this.keyPrefix + sessionId)
+
+    if (session) {
+      const sessionString : string = String(await this.db.get(this.keyPrefix + sessionId))
+      const value = JSON.parse(sessionString)
+      return value
+    } else {
+      return null
+    }
   }
 
-  async createSession(sessionId : string) {
-    await this.db.set(this.keyPrefix + sessionId, JSON.stringify({
-      '_flash': {}
-    }))
+  async createSession(sessionId : string, initialData: Object) {
+    await this.db.set(this.keyPrefix + sessionId, JSON.stringify(initialData))
   }
 
   async deleteSession(sessionId : string) {

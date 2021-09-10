@@ -13,13 +13,11 @@ export default class MemoryStore implements Store {
   }
 
   getSessionById(sessionId : string) {
-    return this.data.get(sessionId)
+    return this.data.has(sessionId) ? this.data.get(sessionId) : null
   }
 
-  createSession(sessionId : string) {
-    this.data.set(sessionId, {
-      '_flash': {}
-    })
+  createSession(sessionId : string, initialData : Object) {
+    this.data.set(sessionId, initialData)
   }
 
   deleteSession(sessionId : string) {

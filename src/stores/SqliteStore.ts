@@ -28,13 +28,11 @@ export default class SqliteStore implements Store {
       session = sess
     }
 
-    return JSON.parse(session);
+    return session ? JSON.parse(session) : null;
   }
 
-  createSession(sessionId : string) {
-    this.db.query(`INSERT INTO ${this.tableName} (id, data) VALUES (?, ?)`, [sessionId, JSON.stringify({
-      '_flash': {}
-    })]);
+  createSession(sessionId : string, initialData : Object) {
+    this.db.query(`INSERT INTO ${this.tableName} (id, data) VALUES (?, ?)`, [sessionId, JSON.stringify(initialData)]);
   }
 
   deleteSession(sessionId : string) {

@@ -51,12 +51,12 @@ export default class CookieStore implements Store{
     return await this.context?.cookies.get('session_data') ? true : false
   }
 
-  getSessionById() {
-    return this.data
+  async getSessionById() {
+    return await this.context?.cookies.get('session_data') ? this.data : null
   }
 
-  createSession() {
-    this.data = {}
+  createSession(id : string, initialData : Object) {
+    this.data = initialData
   }
 
   async deleteSession(ctx : Context) {

@@ -8,16 +8,15 @@ import { DateTime } from 'https://jspm.dev/luxon@2.0.2'
 interface SessionOptions {
   expireAfterSeconds?: number
 }
+
 export default class Session {
-  id: string | null
-  store: Store
   context: Context | null
+  store: Store
   expiration: number | null
 
   constructor (store : Store = new MemoryStore, options? : SessionOptions) {
-    this.id = null
-    this.store = store
     this.context = null
+    this.store = store
     this.expiration = options && options.expireAfterSeconds ? options.expireAfterSeconds : null
   }
 
@@ -30,32 +29,37 @@ export default class Session {
       }
 
       const sid = await ctx.cookies.get('session')
+      ctx.state.session = this
+      ctx.state.sessionCache = null
 
-      if (sid 
-        && await this.sessionExists(sid) 
-        && await this.sessionValid(sid)
-      ) {
-        ctx.state.session = this.getSession(sid)
-        await ctx.state.session.reupSession(sid)
-      } else {
-        if (sid 
-          && await this.sessionExists(sid)
-          && !await this.sessionValid(sid)
-        ) {
-          await this.deleteSession(sid)
+      if (sid) {
+        const session = await this.getSession(sid, true)
+
+        if (session) {
+          if (await this.sessionValid(sid)) {
+            await this.reupSession(sid)
+            ctx.state.sessionID = sid
+          } else {
+            await this.deleteSession(sid)
+            ctx.state.sessionID = await this.createSession()
+          }
+        } else {
+          ctx.state.sessionID = await this.createSession()
         }
-
-        ctx.state.session = await this.createSession()
-        await ctx.cookies.set('session', ctx.state.session.id)
-        await ctx.state.session.set(
-          '_expire', 
-          this.expiration ? DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO() : null
-        )
+      } else {
+        ctx.state.sessionID = await this.createSession()
       }
 
-      await ctx.state.session.set('_flash', {})
+      await this.set('_flash', {})
+      await ctx.cookies.set('session', ctx.state.sessionID)
 
       await next()
+
+      await this.persistSessionData(
+        ctx.state.sessionID, 
+        await this.getSession(ctx.state.sessionID), 
+        true
+      )
 
       if (typeof this.store.afterMiddlewareHook !== 'undefined') {
         await this.store.afterMiddlewareHook()
@@ -63,12 +67,8 @@ export default class Session {
     }
   }
 
-  async sessionExists(id : string) {
-    return await this.store.sessionExists(id)
-  }
-
   async sessionValid(id : string) {
-    const session = await this.store.getSessionById(id)
+    const session = await this.getSession(id)
 
     if (this.expiration) {
       if (DateTime.now() < DateTime.fromISO(session._expire)) {
@@ -82,28 +82,60 @@ export default class Session {
   }
 
   async reupSession(id : string) {
-    const session = await this.store.getSessionById(id)
+    const session = await this.getSession(id)
     session._expire = this.expiration ? DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO() : null
-    await this.store.persistSessionData(id, session)
+    await this.persistSessionData(id, session)
   }
 
   async createSession() {
-    this.id = await nanoid(21)
-    await this.store.createSession(this.id)
-    return this
+    const session = {
+      '_flash': {},
+      '_expire': this.expiration ? DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO() : null
+    }
+
+    const newID = await nanoid(21)
+    await this.store.createSession(newID, session)
+    if (this.context) this.context.state.sessionCache = session
+
+    return newID
   }
 
-  getSession(id : string) {
-    this.id = id
-    return this
+  async getSession(id : string, pullFromStore : boolean = false) {
+    let session = null
+
+    if (pullFromStore) {
+      session = await this.store.getSessionById(id)
+      if (this.context) this.context.state.sessionCache = session
+    } else {
+      if (this.context && this.context.state.sessionCache) {
+        session = this.context.state.sessionCache
+      } else {
+        session = await this.store.getSessionById(id)
+      }
+    }
+
+    if (session) {
+      return session
+    } else {
+      return null
+    }
   }
 
   async deleteSession(sessionIdOrContext : string | Context) {
     if (typeof sessionIdOrContext == 'string') {
       let sessionId = sessionIdOrContext
       await this.store.deleteSession(sessionId)
+      if (this.context) this.context.state.sessionCache = null
     } else {
       let ctx = sessionIdOrContext
+
+      if (sessionIdOrContext instanceof Context) {
+        const sessionID : string | undefined = await ctx.cookies.get('session')
+        if (sessionID) {
+          if (this.context) this.context.state.sessionCache = null
+        }
+      }
+
       if (sessionIdOrContext instanceof Context && this.store instanceof CookieStore) {
         await this.store.deleteSession(ctx)
       } else {
@@ -119,41 +151,51 @@ export default class Session {
     }
   }
 
+  async persistSessionData(id : string, data: Object, pushToStore : boolean = false) {
+    if (this.context) this.context.state.sessionCache = data
+
+    if (pushToStore) {
+      await this.store.persistSessionData(id, data)
+    }
+  }
+
   async get(key : string) {
-    if (typeof this.id == 'string') {
-      const session = await this.store.getSessionById(this.id)
+    if (this.context) {
+      const session = await this.getSession(this.context.state.sessionID)
 
       if (session.hasOwnProperty(key)) {
         return session[key]
       } else {
         return session['_flash'][key]
       }
+    } else {
+      return null
     }
   }
 
   async set(key : string, value : unknown) {
-    if (typeof this.id == 'string') {
-      const session = await this.store.getSessionById(this.id)
+    if (this.context) {
+      const session = await this.getSession(this.context.state.sessionID)
 
       session[key] = value
 
-      await this.store.persistSessionData(this.id, session)
-    } 
+      await this.persistSessionData(this.context.state.sessionID, session)
+    }
   }
 
   async flash(key : string, value : unknown) {
-    if (typeof this.id == 'string') {
-      const session = await this.store.getSessionById(this.id)
+    if (this.context) {
+      const session = await this.getSession(this.context.state.sessionID)
 
       session['_flash'][key] = value
 
-      await this.store.persistSessionData(this.id, session)
+      await this.persistSessionData(this.context.state.sessionID, session)
     }
   }
 
   async has(key : string) {
-    if (typeof this.id == 'string') {
-      const session = await this.store.getSessionById(this.id)
+    if (this.context) {
+      const session = await this.getSession(this.context.state.sessionID)
 
       if (session.hasOwnProperty(key)) {
         return true
