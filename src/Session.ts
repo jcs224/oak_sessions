@@ -8,6 +8,8 @@ import { CookiesGetOptions, CookiesSetDeleteOptions } from 'https://deno.land/x/
 
 interface SessionOptions {
   expireAfterSeconds?: number
+  cookieGetOptions?: CookiesGetOptions
+  cookieSetOptions?: CookiesSetDeleteOptions
 }
 
 export default class Session {
@@ -17,12 +19,12 @@ export default class Session {
   cookieSetOption: CookiesSetDeleteOptions
   cookieGetOption: CookiesGetOptions
 
-  constructor (store : Store = new MemoryStore, options? : SessionOptions, cookieSetOption? : CookiesSetDeleteOptions, cookieGetOption? : CookiesGetOptions) {
+  constructor (store : Store = new MemoryStore, options? : SessionOptions) {
     this.context = null
     this.store = store
     this.expiration = options && options.expireAfterSeconds ? options.expireAfterSeconds : null
-    this.cookieGetOption = cookieGetOption ?? {}
-    this.cookieSetOption = cookieSetOption ?? {}
+    this.cookieGetOption = options?.cookieGetOptions ?? {}
+    this.cookieSetOption = options?.cookieSetOptions ?? {}
   }
 
   initMiddleware() {
