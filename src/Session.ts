@@ -16,15 +16,15 @@ export default class Session {
   context: Context | null
   store: Store
   expiration: number | null
-  cookieSetOption: CookiesSetDeleteOptions
-  cookieGetOption: CookiesGetOptions
+  cookieSetOptions: CookiesSetDeleteOptions
+  cookieGetOptions: CookiesGetOptions
 
   constructor (store : Store = new MemoryStore, options? : SessionOptions) {
     this.context = null
     this.store = store
     this.expiration = options && options.expireAfterSeconds ? options.expireAfterSeconds : null
-    this.cookieGetOption = options?.cookieGetOptions ?? {}
-    this.cookieSetOption = options?.cookieSetOptions ?? {}
+    this.cookieGetOptions = options?.cookieGetOptions ?? {}
+    this.cookieSetOptions = options?.cookieSetOptions ?? {}
   }
 
   initMiddleware() {
@@ -35,7 +35,7 @@ export default class Session {
         await this.store.insertSessionMiddlewareContext(ctx)
       }
 
-      const sid = await ctx.cookies.get('session', this.cookieGetOption)
+      const sid = await ctx.cookies.get('session', this.cookieGetOptions)
       ctx.state.session = this
       ctx.state.sessionCache = null
 
@@ -58,7 +58,7 @@ export default class Session {
       }
 
       await this.set('_flash', {})
-      await ctx.cookies.set('session', ctx.state.sessionID, this.cookieSetOption)
+      await ctx.cookies.set('session', ctx.state.sessionID, this.cookieSetOptions)
 
       await next()
 
@@ -137,7 +137,7 @@ export default class Session {
       let ctx = sessionIdOrContext
 
       if (sessionIdOrContext instanceof Context) {
-        const sessionID : string | undefined = await ctx.cookies.get('session', this.cookieGetOption)
+        const sessionID : string | undefined = await ctx.cookies.get('session', this.cookieGetOptions)
         if (sessionID) {
           if (this.context) this.context.state.sessionCache = null
         }
@@ -146,7 +146,7 @@ export default class Session {
       if (sessionIdOrContext instanceof Context && this.store instanceof CookieStore) {
         await this.store.deleteSession(ctx)
       } else {
-        const sessionID : string | undefined = await ctx.cookies.get('session', this.cookieGetOption)
+        const sessionID : string | undefined = await ctx.cookies.get('session', this.cookieGetOptions)
         if (typeof sessionID == 'string') {
           await this.store.deleteSession(sessionID)
         }
@@ -154,7 +154,7 @@ export default class Session {
     }
 
     if (this.context instanceof Context) {
-      await this.context.cookies.delete('session', this.cookieSetOption)
+      await this.context.cookies.delete('session', this.cookieSetOptions)
     }
   }
 
