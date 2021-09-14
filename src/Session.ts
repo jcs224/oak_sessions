@@ -4,20 +4,27 @@ import CookieStore from './stores/CookieStore.ts'
 import { Context } from 'https://deno.land/x/oak@v9.0.0/context.ts'
 import Store from './stores/Store.ts'
 import { DateTime } from 'https://jspm.dev/luxon@2.0.2'
+import { CookiesGetOptions, CookiesSetDeleteOptions } from 'https://deno.land/x/oak@v9.0.0/cookies.ts'
 
 interface SessionOptions {
   expireAfterSeconds?: number
+  cookieGetOptions?: CookiesGetOptions
+  cookieSetOptions?: CookiesSetDeleteOptions
 }
 
 export default class Session {
   context: Context | null
   store: Store
   expiration: number | null
+  cookieSetOptions: CookiesSetDeleteOptions
+  cookieGetOptions: CookiesGetOptions
 
   constructor (store : Store = new MemoryStore, options? : SessionOptions) {
     this.context = null
     this.store = store
     this.expiration = options && options.expireAfterSeconds ? options.expireAfterSeconds : null
+    this.cookieGetOptions = options?.cookieGetOptions ?? {}
+    this.cookieSetOptions = options?.cookieSetOptions ?? {}
   }
 
   initMiddleware() {
@@ -28,7 +35,7 @@ export default class Session {
         await this.store.insertSessionMiddlewareContext(ctx)
       }
 
-      const sid = await ctx.cookies.get('session')
+      const sid = await ctx.cookies.get('session', this.cookieGetOptions)
       ctx.state.session = this
       ctx.state.sessionCache = null
 
@@ -51,7 +58,7 @@ export default class Session {
       }
 
       await this.set('_flash', {})
-      await ctx.cookies.set('session', ctx.state.sessionID)
+      await ctx.cookies.set('session', ctx.state.sessionID, this.cookieSetOptions)
 
       await next()
 
@@ -130,7 +137,7 @@ export default class Session {
       let ctx = sessionIdOrContext
 
       if (sessionIdOrContext instanceof Context) {
-        const sessionID : string | undefined = await ctx.cookies.get('session')
+        const sessionID : string | undefined = await ctx.cookies.get('session', this.cookieGetOptions)
         if (sessionID) {
           if (this.context) this.context.state.sessionCache = null
         }
@@ -139,7 +146,7 @@ export default class Session {
       if (sessionIdOrContext instanceof Context && this.store instanceof CookieStore) {
         await this.store.deleteSession(ctx)
       } else {
-        const sessionID : string | undefined = await ctx.cookies.get('session')
+        const sessionID : string | undefined = await ctx.cookies.get('session', this.cookieGetOptions)
         if (typeof sessionID == 'string') {
           await this.store.deleteSession(sessionID)
         }
@@ -147,7 +154,7 @@ export default class Session {
     }
 
     if (this.context instanceof Context) {
-      await this.context.cookies.delete('session')
+      await this.context.cookies.delete('session', this.cookieSetOptions)
     }
   }
 
