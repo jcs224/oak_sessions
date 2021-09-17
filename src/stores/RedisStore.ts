@@ -1,5 +1,5 @@
 import Store from './Store.ts'
-import { Redis, Bulk } from 'https://deno.land/x/redis@v0.22.2/mod.ts'
+import { Redis } from 'https://deno.land/x/redis@v0.24.0/mod.ts'
 
 export default class RedisStore implements Store {
   keyPrefix : string
