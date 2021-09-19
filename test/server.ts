@@ -65,3 +65,4 @@ app.use(router.routes());
 app.use(router.allowedMethods());
 
 app.listen({ port: 8002 })
+console.log('test server running')

@@ -57,6 +57,7 @@ export default class Session {
         ctx.state.sessionID = await this.createSession()
       }
 
+      await this.set('_accessed', DateTime.now().setZone('UTC').toISO())
       await this.set('_flash', {})
       await ctx.cookies.set('session', ctx.state.sessionID, this.cookieSetOptions)
 
@@ -97,6 +98,7 @@ export default class Session {
   async createSession() {
     const session = {
       '_flash': {},
+      '_accessed': DateTime.now().setZone('UTC').toISO(),
       '_expire': this.expiration ? DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO() : null
     }
 
