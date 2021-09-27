@@ -1,14 +1,16 @@
 import CryptoJS from 'https://cdn.skypack.dev/crypto-js@4.1.1'
 import Store from './Store.ts'
 import { Context } from 'https://deno.land/x/oak@v9.0.0/context.ts'
+import { SessionData } from '../Session.ts'
 
 export default class CookieStore implements Store{
-  data: Object
+  data: SessionData | null
+  
   encryptionKey: string | null
   context : Context | null
 
   constructor(encryptionKey : string | null = null) {
-    this.data = {}
+    this.data = null
     this.encryptionKey = encryptionKey
     this.context = null
   }
@@ -27,21 +29,21 @@ export default class CookieStore implements Store{
         try {
           decryptedCookie = bytes.toString(CryptoJS.enc.Utf8)
         } catch (e) {
-          this.data = {}
+          this.data = null
         }
         
         if (decryptedCookie) {
           try {
             this.data = JSON.parse(decryptedCookie)
           } catch (e) {
-            this.data = {}
+            this.data = null
           }
         }
       } else {
         try {
-          this.data = typeof sessionDataString == 'string' ? JSON.parse(sessionDataString) : {}
+          this.data = typeof sessionDataString == 'string' ? JSON.parse(sessionDataString) as SessionData : null
         } catch (e) {
-          this.data = {}
+          this.data = null
         }
       }
     }
@@ -55,7 +57,7 @@ export default class CookieStore implements Store{
     return await this.context?.cookies.get('session_data') ? this.data : null
   }
 
-  createSession(id : string, initialData : Object) {
+  createSession(id : string, initialData : SessionData) {
     this.data = initialData
   }
 
@@ -63,7 +65,7 @@ export default class CookieStore implements Store{
     await ctx.cookies.delete('session_data')
   }
 
-  persistSessionData(id : string, sessionData : any) {
+  persistSessionData(id : string, sessionData : SessionData) {
     this.data = sessionData
   }
 

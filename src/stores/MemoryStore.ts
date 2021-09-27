@@ -1,8 +1,9 @@
 import Store from './Store.ts'
 import { Redis } from 'https://deno.land/x/redis@v0.22.2/mod.ts'
+import { SessionData } from '../Session.ts'
 
 export default class MemoryStore implements Store {
-  data: Map<string, unknown>
+  data: Map<string, SessionData>
 
   constructor() {
     this.data = new Map
@@ -13,10 +14,10 @@ export default class MemoryStore implements Store {
   }
 
   getSessionById(sessionId : string) {
-    return this.data.has(sessionId) ? this.data.get(sessionId) : null
+    return this.data.has(sessionId) ? this.data.get(sessionId)! : null
   }
 
-  createSession(sessionId : string, initialData : Object) {
+  createSession(sessionId : string, initialData : SessionData) {
     this.data.set(sessionId, initialData)
   }
 
@@ -24,7 +25,7 @@ export default class MemoryStore implements Store {
     this.data.delete(sessionId)
   }
 
-  persistSessionData(sessionId : string, sessionData : Object) {
+  persistSessionData(sessionId : string, sessionData : SessionData) {
     this.data.set(sessionId, sessionData)
   }
 }
