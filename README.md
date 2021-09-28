@@ -6,7 +6,7 @@ Use cookie-based web sessions with the Oak framework.
 
 ```ts
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
-import { Session } from "https://deno.land/x/sessions/mod.ts";
+import { Session } from "https://deno.land/x/oak_sessions/mod.ts";
 
 const app = new Application();
 
