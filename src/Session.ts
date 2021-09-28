@@ -14,8 +14,8 @@ interface SessionOptions {
 
 export interface SessionData {
   _flash: Record<string, unknown>
-  _accessed: unknown
-  _expire: unknown
+  _accessed: string | null
+  _expire: string | null
   [key: string]: unknown
 }
 
