@@ -12,6 +12,13 @@ interface SessionOptions {
   cookieSetOptions?: CookiesSetDeleteOptions
 }
 
+export interface SessionData {
+  _flash: Record<string, unknown>
+  _accessed: unknown
+  _expire: unknown
+  [key: string]: unknown
+}
+
 export default class Session {
   context: Context | null
   store: Store
@@ -65,7 +72,7 @@ export default class Session {
 
       await this.persistSessionData(
         ctx.state.sessionID, 
-        await this.getSession(ctx.state.sessionID), 
+        await this.getSession(ctx.state.sessionID) as SessionData, 
         true
       )
 
@@ -76,7 +83,7 @@ export default class Session {
   }
 
   async sessionValid(id : string) {
-    const session = await this.getSession(id)
+    const session = await this.getSession(id) as SessionData
 
     if (this.expiration) {
       if (DateTime.now() < DateTime.fromISO(session._expire)) {
@@ -90,7 +97,7 @@ export default class Session {
   }
 
   async reupSession(id : string) {
-    const session = await this.getSession(id)
+    const session = await this.getSession(id) as SessionData
     session._expire = this.expiration ? DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO() : null
     await this.persistSessionData(id, session)
   }
@@ -109,7 +116,7 @@ export default class Session {
     return newID
   }
 
-  async getSession(id : string, pullFromStore : boolean = false) {
+  async getSession(id : string, pullFromStore : boolean = false): Promise<SessionData | null> {
     let session = null
 
     if (pullFromStore) {
@@ -160,7 +167,7 @@ export default class Session {
     }
   }
 
-  async persistSessionData(id : string, data: Object, pushToStore : boolean = false) {
+  async persistSessionData(id : string, data: SessionData, pushToStore : boolean = false) {
     if (this.context) this.context.state.sessionCache = data
 
     if (pushToStore) {
@@ -170,7 +177,7 @@ export default class Session {
 
   async get(key : string) {
     if (this.context) {
-      const session = await this.getSession(this.context.state.sessionID)
+      const session = await this.getSession(this.context.state.sessionID) as SessionData
 
       if (session.hasOwnProperty(key)) {
         return session[key]
@@ -184,7 +191,7 @@ export default class Session {
 
   async set(key : string, value : unknown) {
     if (this.context) {
-      const session = await this.getSession(this.context.state.sessionID)
+      const session = await this.getSession(this.context.state.sessionID) as SessionData
 
       session[key] = value
 
@@ -194,7 +201,7 @@ export default class Session {
 
   async flash(key : string, value : unknown) {
     if (this.context) {
-      const session = await this.getSession(this.context.state.sessionID)
+      const session = await this.getSession(this.context.state.sessionID) as SessionData
 
       session['_flash'][key] = value
 
@@ -204,7 +211,7 @@ export default class Session {
 
   async has(key : string) {
     if (this.context) {
-      const session = await this.getSession(this.context.state.sessionID)
+      const session = await this.getSession(this.context.state.sessionID) as SessionData
 
       if (session.hasOwnProperty(key)) {
         return true

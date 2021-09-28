@@ -1,4 +1,5 @@
 import Store from './Store.ts'
+import { SessionData } from '../Session.ts'
 
 type WebdisOptions = {
   url : string,
@@ -27,13 +28,13 @@ export default class WebdisStore implements Store {
     const session = payloadJSON.GET
 
     if (session) {
-      return JSON.parse(session)
+      return JSON.parse(session) as SessionData
     } else {
       return null
     }
   }
 
-  async createSession(sessionId : string, initialData : Object) {
+  async createSession(sessionId : string, initialData : SessionData) {
     await fetch(this.url + '/SET/' + this.keyPrefix + sessionId + '/'+JSON.stringify(initialData))
   }
 
@@ -41,7 +42,7 @@ export default class WebdisStore implements Store {
     await fetch(this.url + '/DEL/' + this.keyPrefix + sessionId)
   }
 
-  async persistSessionData(sessionId : string, sessionData : Object) {
+  async persistSessionData(sessionId : string, sessionData : SessionData) {
     await fetch(this.url + '/SET/' + this.keyPrefix + sessionId + '/' + encodeURI(JSON.stringify(sessionData)))
   }
 }
