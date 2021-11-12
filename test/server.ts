@@ -9,12 +9,12 @@ app.addEventListener('error', (evt) => {
     console.log(evt.error)
 })
 
-const store = new MemoryStore
+// const store = new MemoryStore
 
 // const store = new CookieStore('a-secret-key')
 
-// const sqlite = new sqliteDB('./database.db')
-// const store = new SqliteStore(sqlite)
+const sqlite = new sqliteDB('./database.db')
+const store = new SqliteStore(sqlite)
 
 // const redis = await connectRedis({
 //     hostname: '0.0.0.0',
@@ -31,13 +31,14 @@ const session = new Session(store)
 
 // new Session(router, store)
 
-router.post('/delete', async (ctx) => {
-    await session.deleteSession(ctx)
+app.use(session.initMiddleware())
 
+router.post('/delete', async (ctx) => {
+    await ctx.state.session.deleteSession()
     ctx.response.redirect('/')
 })
 
-.get("/", session.initMiddleware(), async (context) => {
+.get("/", async (context) => {
     // Examples of getting and setting variables on a session
     if (await context.state.session.has("pageCount")) {
         await context.state.session.set("pageCount", await context.state.session.get("pageCount") + 1);

@@ -137,28 +137,34 @@ export default class Session {
     }
   }
 
-  async deleteSession(sessionIdOrContext : string | Context) {
-    if (typeof sessionIdOrContext == 'string') {
-      let sessionId = sessionIdOrContext
-      await this.store.deleteSession(sessionId)
-      if (this.context) this.context.state.sessionCache = null
-    } else {
-      let ctx = sessionIdOrContext
-
-      if (sessionIdOrContext instanceof Context) {
-        const sessionID : string | undefined = await ctx.cookies.get('session', this.cookieGetOptions)
-        if (sessionID) {
-          if (this.context) this.context.state.sessionCache = null
+  async deleteSession(sessionIdOrContext? : string | Context) {
+    if (sessionIdOrContext) {
+      if (typeof sessionIdOrContext == 'string') {
+        let sessionId = sessionIdOrContext
+        await this.store.deleteSession(sessionId)
+        if (this.context) this.context.state.sessionCache = null
+      } else {
+        let ctx = sessionIdOrContext
+  
+        if (sessionIdOrContext instanceof Context) {
+          const sessionID : string | undefined = await ctx.cookies.get('session', this.cookieGetOptions)
+          if (sessionID) {
+            if (this.context) this.context.state.sessionCache = null
+          }
+        }
+  
+        if (sessionIdOrContext instanceof Context && this.store instanceof CookieStore) {
+          await this.store.deleteSession(ctx)
+        } else {
+          const sessionID : string | undefined = await ctx.cookies.get('session', this.cookieGetOptions)
+          if (typeof sessionID == 'string') {
+            await this.store.deleteSession(sessionID)
+          }
         }
       }
-
-      if (sessionIdOrContext instanceof Context && this.store instanceof CookieStore) {
-        await this.store.deleteSession(ctx)
-      } else {
-        const sessionID : string | undefined = await ctx.cookies.get('session', this.cookieGetOptions)
-        if (typeof sessionID == 'string') {
-          await this.store.deleteSession(sessionID)
-        }
+    } else {
+      if (this.context instanceof Context && this.context.state.sessionID) {
+        await this.store.deleteSession(this.context.state.sessionID)
       }
     }
 

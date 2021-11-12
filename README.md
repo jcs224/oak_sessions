@@ -14,8 +14,10 @@ const app = new Application();
 const session = new Session();
 const router = new Router();
 
-// Include the session.initMiddleware on the routes you want to use sessions for
-router.get("/session", session.initMiddleware(), async (ctx) => {
+// Apply sessions your Oak application. You can also apply the middleware to specific routes instead of the whole app.
+app.use(session.initMiddleware())
+
+router.get("/session", async (ctx) => {
 
     // Examples of getting and setting variables on a session
     if (!await ctx.state.session.has("pageCount")) {
@@ -30,11 +32,12 @@ router.get("/session", session.initMiddleware(), async (ctx) => {
     
     ctx.response.body = `Visited page ${await ctx.state.session.get("pageCount")} times`;
 })
-// When deleting a session, it's not recommended to do it with the session middleware in the route you perform the deletion.
 .post('/delete', async (ctx) => {
-    // Pass the router context as the parameter to deleteSession()
-    await session.deleteSession(ctx)
-    // Optionally, you can also just pass the string of the session ID in case you aren't within a routing context.
+    // Call the delete method
+    await ctx.state.session.deleteSession()
+    // Optionally, you can also pass the context if you're not in a session route
+    // await session.deleteSession(ctx)
+    // or, the string of the session ID in case you aren't within any routing context.
     // await session.deleteSession(ctx.cookies.get('session'))
 
     ctx.response.redirect('/')
