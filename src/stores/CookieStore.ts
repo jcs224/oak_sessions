@@ -1,6 +1,6 @@
 import CryptoJS from 'https://cdn.skypack.dev/crypto-js@4.1.1'
 import Store from './Store.ts'
-import { Context } from 'https://deno.land/x/oak@v9.0.1/context.ts'
+import { Context } from 'https://deno.land/x/oak@v10.0.0/context.ts'
 import { SessionData } from '../Session.ts'
 
 export default class CookieStore implements Store{

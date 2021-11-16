@@ -1,10 +1,10 @@
 import { nanoid } from 'https://deno.land/x/nanoid@v3.0.0/async.ts'
 import MemoryStore from './stores/MemoryStore.ts'
 import CookieStore from './stores/CookieStore.ts'
-import { Context } from 'https://deno.land/x/oak@v9.0.1/context.ts'
+import { Context } from 'https://deno.land/x/oak@v10.0.0/context.ts'
 import Store from './stores/Store.ts'
 import { DateTime } from 'https://jspm.dev/luxon@2.0.2'
-import { CookiesGetOptions, CookiesSetDeleteOptions } from 'https://deno.land/x/oak@v9.0.1/cookies.ts'
+import { CookiesGetOptions, CookiesSetDeleteOptions } from 'https://deno.land/x/oak@v10.0.0/cookies.ts'
 
 interface SessionOptions {
   expireAfterSeconds?: number
