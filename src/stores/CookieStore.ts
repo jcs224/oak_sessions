@@ -62,7 +62,7 @@ export default class CookieStore implements Store{
   }
 
   async deleteSession(ctx : Context) {
-    await ctx.cookies.delete('session_data')
+    await this.context?.cookies.delete('session_data')
   }
 
   persistSessionData(id : string, sessionData : SessionData) {
