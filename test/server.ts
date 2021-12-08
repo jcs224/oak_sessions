@@ -38,24 +38,58 @@ router.post('/delete', async (ctx) => {
     ctx.response.redirect('/')
 })
 
-.get("/", async (context) => {
-    // Examples of getting and setting variables on a session
-    if (await context.state.session.has("pageCount")) {
-        await context.state.session.set("pageCount", await context.state.session.get("pageCount") + 1);
+.post('/increment2', async (ctx) => {
+    if (await ctx.state.session.has("incrementor2")) {
+        await ctx.state.session.set("incrementor2", await ctx.state.session.get("incrementor2") + 1);
     } else {
-        await context.state.session.set("pageCount", 0);
+        await ctx.state.session.set("incrementor2", 0);
     }
 
-    if ((await context.state.session.get('pageCount')) % 3 == 0) {
+    ctx.response.redirect('/')
+})
+
+.post('/increment', async (ctx) => {
+    if (await ctx.state.session.has("incrementor1")) {
+        await ctx.state.session.set("incrementor1", await ctx.state.session.get("incrementor1") + 1);
+    } else {
+        await ctx.state.session.set("incrementor1", 0);
+    }
+
+    ctx.response.redirect('/')
+})
+
+.get("/", async (context) => {
+    // Examples of getting and setting variables on a session
+    if (await context.state.session.has("incrementor1")) {
+        await context.state.session.get("incrementor1")
+    } else {
+        await context.state.session.set("incrementor1", 0)
+    }
+
+    if (await context.state.session.has("incrementor2")) {
+        await context.state.session.get("incrementor2")
+    } else {
+        await context.state.session.set("incrementor2", 0)
+    }
+
+    if ((await context.state.session.get('incrementor1')) % 3 == 0) {
         await context.state.session.flash('message', 'FLASH!!')
     }
     
     context.response.body = `
     <body>
-        Visited page ${await context.state.session.get("pageCount")} times!</br>
-        ${await context.state.session.has('message') ? await context.state.session.get('message') : ''}
+        First counter: ${await context.state.session.get("incrementor1")} ${await context.state.session.has('message') ? await context.state.session.get('message') : ''}</br>
+        Second counter: ${await context.state.session.get("incrementor2")}</br></br>
+        <form action="/increment" method="post">
+        <button id="inc-button" type="submit">Increment first counter</button>
+        </form>
+
+        <form action="/increment2" method="post">
+        <button id="inc-button-2" type="submit">Increment second counter</button>
+        </form>
+
         <form action="/delete" method="post">
-        <button type="submit">Delete Session</button>
+        <button id="del-button" type="submit">Delete Session</button>
         </form>
     </body>`;
 

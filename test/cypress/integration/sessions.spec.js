@@ -1,32 +1,53 @@
 describe('Sessions Test', () => {
   it('Check for correct session value on page refresh', () => {
     cy.visit('http://localhost:8002')
-      .contains('0 times!')
+      .contains('First counter: 0')
+      .contains('Second counter: 0')
       .contains('FLASH!!')
 
-    cy.reload()
-    .contains('1 times!')
+    cy.get('#inc-button').click()
+    cy.contains('First counter: 1')
+    .contains('Second counter: 0')
     .should('not.contain', 'FLASH!!')
 
-    cy.reload()
-    .contains('2 times!')
+    cy.get('#inc-button').click()
+    cy.contains('First counter: 2')
+    .contains('Second counter: 0')
     .should('not.contain', 'FLASH!!')
 
-    cy.reload()
-    .contains('3 times!')
+    cy.get('#inc-button-2').click()
+    cy.contains('First counter: 2')
+    .contains('Second counter: 1')
+    .should('not.contain', 'FLASH!!')
+
+    cy.get('#inc-button-2').click()
+    cy.contains('First counter: 2')
+    .contains('Second counter: 2')
+    .should('not.contain', 'FLASH!!')
+
+    cy.get('#inc-button-2').click()
+    cy.contains('First counter: 2')
+    .contains('Second counter: 3')
+    .should('not.contain', 'FLASH!!')
+
+    cy.get('#inc-button').click()
+    cy.contains('First counter: 3')
+    .contains('Second counter: 3')
     .contains('FLASH!!')
 
-    cy.reload()
-    .contains('4 times!')
+    cy.get('#inc-button').click()
+    cy.contains('First counter: 4')
+    .contains('Second counter: 3')
     .should('not.contain', 'FLASH!!')
 
-    cy.reload()
-    .contains('5 times!')
+    cy.get('#inc-button').click()
+    cy.contains('First counter: 5')
+    .contains('Second counter: 3')
     .should('not.contain', 'FLASH!!')
 
-    cy.get('button').click()
-    
-    cy.contains('0 times!')
+    cy.get('#del-button').click()
+    cy.contains('First counter: 0')
+    .contains('Second counter: 0')
     .contains('FLASH!!')
   })
 })
