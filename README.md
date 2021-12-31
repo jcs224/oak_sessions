@@ -98,7 +98,7 @@ import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Session, RedisStore } from "https://deno.land/x/oak_sessions/mod.ts";
 
 // import the Redis library
-import { connect } from 'https://deno.land/x/redis@v0.22.2/mod.ts'
+import { connect } from 'https://deno.land/x/redis@v0.25.0/mod.ts'
 
 const app = new Application();
 
