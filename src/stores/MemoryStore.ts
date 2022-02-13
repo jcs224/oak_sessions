@@ -21,6 +21,7 @@ export default class MemoryStore implements Store {
   }
 
   deleteSession(sessionId : string) {
+    console.log('info 1')
     this.data.delete(sessionId)
   }
 

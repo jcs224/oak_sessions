@@ -1,4 +1,4 @@
-import type { Context } from 'https://deno.land/x/oak@v10.1.0/context.ts'
+import type { Context } from '../../deps.ts'
 import { SessionData } from '../Session.ts'
 
 export default interface Store {
