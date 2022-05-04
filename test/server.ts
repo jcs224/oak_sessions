@@ -1,7 +1,8 @@
 import { Application, Router, Context } from "../deps.ts"
-import { Session, RedisStore, SqliteStore, WebdisStore, MemoryStore, CookieStore } from '../mod.ts'
+import { Session, RedisStore, SqliteStore, WebdisStore, MemoryStore, CookieStore, PostgresStore } from '../mod.ts'
 import { connect as connectRedis } from 'https://deno.land/x/redis@v0.25.0/mod.ts'
 import { DB as sqliteDB } from 'https://deno.land/x/sqlite@v2.4.0/mod.ts'
+import postgres from 'https://deno.land/x/postgresjs@v3.1.0/mod.js'
 
 const app = new Application()
 
@@ -25,6 +26,17 @@ const store = new MemoryStore
 // const store = new WebdisStore({
 //     url: 'http://127.0.0.1:7379'
 // })
+
+// const sql = postgres({
+//     host: 'localhost',
+//     port: 26257,
+//     database: 'defaultdb',
+//     user: 'root',
+//     password: '',
+// })
+//
+// const store = new PostgresStore(sql)
+// await store.initSessionsTable()
 
 const router = new Router();
 const session = new Session(store)
