@@ -3,7 +3,7 @@ describe('Sessions Test', () => {
     cy.visit('http://localhost:8002')
       .contains('First counter: 0')
       .contains('Second counter: 0')
-      .contains('FLASH!!')
+      .contains('FIRST FLASH!!')
 
     cy.get('#inc-button').click()
     cy.contains('First counter: 1')

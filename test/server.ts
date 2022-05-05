@@ -89,7 +89,7 @@ router.post('/delete', async (ctx) => {
     }
 
     if ((await context.state.session.get('incrementor1')) == 0) {
-        await context.state.session.flash('message', 'FLASH!!')
+        await context.state.session.flash('message', 'FIRST FLASH!!')
     }
 
     context.response.body = `
