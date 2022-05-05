@@ -67,6 +67,10 @@ router.post('/delete', async (ctx) => {
         await ctx.state.session.set("incrementor1", 0);
     }
 
+    if ((await ctx.state.session.get('incrementor1')) % 3 == 0) {
+        await ctx.state.session.flash('message', 'FLASH!!')
+    }
+
     ctx.response.redirect('/')
 })
 
@@ -84,10 +88,10 @@ router.post('/delete', async (ctx) => {
         await context.state.session.set("incrementor2", 0)
     }
 
-    if ((await context.state.session.get('incrementor1')) % 3 == 0) {
+    if ((await context.state.session.get('incrementor1')) == 0) {
         await context.state.session.flash('message', 'FLASH!!')
     }
-    
+
     context.response.body = `
     <body>
         First counter: ${await context.state.session.get("incrementor1")} ${await context.state.session.has('message') ? await context.state.session.get('message') : ''}</br>

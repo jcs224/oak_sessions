@@ -65,7 +65,6 @@ export default class Session {
       }
 
       await this.set('_accessed', DateTime.now().setZone('UTC').toISO())
-      await this.set('_flash', {})
       await ctx.cookies.set('session', ctx.state.sessionID, this.cookieSetOptions)
 
       await next()
@@ -188,7 +187,9 @@ export default class Session {
       if (session.hasOwnProperty(key)) {
         return session[key]
       } else {
-        return session['_flash'][key]
+        const value = session['_flash'][key]
+        delete session['_flash'][key]
+        return value
       }
     } else {
       return null
