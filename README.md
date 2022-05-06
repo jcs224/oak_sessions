@@ -1,6 +1,7 @@
 # Oak Sessions
 
 Use cookie-based web sessions with the Oak framework.
+Supports flash messages - session data that is deleted after it's read.
 
 ## Usage
 
@@ -8,45 +9,84 @@ Use cookie-based web sessions with the Oak framework.
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Session } from "https://deno.land/x/oak_sessions/mod.ts";
 
-const app = new Application();
+type AppState = {
+    session: Session
+}
+const app = new Application<AppState>()
+
+app.addEventListener('error', (evt) => {
+    console.log(evt.error)
+})
+
+const router = new Router<AppState>();
 
 // Instantiate session
-const session = new Session();
-const router = new Router();
+const session = new Session()
 
-// Apply sessions your Oak application. You can also apply the middleware to specific routes instead of the whole app.
+// Apply sessions to your Oak application. You can also apply the middleware to specific routes instead of the whole app.
 app.use(session.initMiddleware())
 
-router.get("/session", async (ctx) => {
-
-    // Examples of getting and setting variables on a session
-    if (!await ctx.state.session.has("pageCount")) {
-        await ctx.state.session.set("pageCount", 0);
-
+router.post('/login', async (ctx) => {
+    const form = await ctx.request.body({type: 'form'}).value
+    if(form.get('password') === 'correct') {
+        // Set persistent data in the session
+        await ctx.state.session.set('email', form.get('email'))
+        await ctx.state.session.set('failed-login-attempts', null)
+        // Set flash data in the session. This will be removed the first time it's accessed with get
+        await ctx.state.session.flash('message', 'Login successful')
     } else {
-        await ctx.state.session.set("pageCount", await ctx.state.session.get("pageCount") + 1);
+        const failedLoginAttempts = (await ctx.state.session.get('failed-login-attempts') || 0) as number
+        await ctx.state.session.set('failed-login-attempts', failedLoginAttempts+1)
+        await ctx.state.session.flash('error', 'Incorrect username or password')
     }
-
-    // If you only want a variable to survive for a single request, you can "flash" it instead
-    await ctx.state.session.flash("message", "I am good for form validations errors, success messages, etc.")
-    
-    ctx.response.body = `Visited page ${await ctx.state.session.get("pageCount")} times`;
-})
-.post('/delete', async (ctx) => {
-    // Call the delete method
-    await ctx.state.session.deleteSession()
-    // Optionally, you can also pass the context if you're not in a session route
-    // await session.deleteSession(ctx)
-    // or, the string of the session ID in case you aren't within any routing context.
-    // await session.deleteSession(ctx.cookies.get('session'))
-
     ctx.response.redirect('/')
-});
+})
+
+router.post('/logout', async (ctx) => {
+    // Clear all session data
+    await ctx.state.session.deleteSession()
+    ctx.response.redirect('/')
+})
+
+router.get("/", async (ctx) => {
+    const message = await ctx.state.session.get('message') || ''
+    const error = await ctx.state.session.get('error') || ''
+    const failedLoginAttempts = await ctx.state.session.get('failed-login-attempts')
+    const email = await ctx.state.session.get('email')
+    ctx.response.body = `<!DOCTYPE html>
+    <body>
+        <p>
+            ${message}
+        </p>
+        <p>
+            ${error}
+        </p>
+        <p>
+            ${failedLoginAttempts ? `Failed login attempts: ${failedLoginAttempts}` : ''}
+        </p>
+
+        ${email ? 
+        `<form id="logout" action="/logout" method="post">
+            <button name="logout" type="submit">Log out ${email}</button>
+        </form>`
+        : 
+        `<form id="login" action="/login" method="post">
+            <p>
+                <input id="email" name="email" type="text" placeholder="you@email.com">
+            </p>
+            <p>
+                <input id="password" name="password" type="password" placeholder="password">
+            </p>
+            <button name="login" type="submit">Log in</button>
+        </form>` 
+    }
+    </body>`;
+})
 
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-await app.listen({ port: 8000 });
+app.listen({ port: 8002 });
 ```
 
 ## Storage
@@ -80,7 +120,7 @@ const session = new Session(store);
 ```ts
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Session, SqliteStore } from "https://deno.land/x/oak_sessions/mod.ts";
-import { DB } from 'https://deno.land/x/sqlite@v2.4.0/mod.ts'
+import { DB } from 'https://deno.land/x/sqlite@v3.4.0/mod.ts'
 
 const app = new Application();
 const sqlite = new DB('./database.db') 

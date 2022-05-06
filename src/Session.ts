@@ -168,7 +168,7 @@ export default class Session {
     }
 
     if (this.context instanceof Context) {
-      await this.context.cookies.delete('session', this.cookieSetOptions)
+      this.context.cookies.delete('session', this.cookieSetOptions)
     }
   }
 
@@ -200,7 +200,11 @@ export default class Session {
     if (this.context) {
       const session = await this.getSession(this.context.state.sessionID) as SessionData
 
-      session[key] = value
+      if(value === null || value === undefined) {
+        delete session[key]
+      } else {
+        session[key] = value
+      }
 
       await this.persistSessionData(this.context.state.sessionID, session)
     }

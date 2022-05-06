@@ -1,4 +1,4 @@
-import { DB } from "https://deno.land/x/sqlite@v2.4.0/mod.ts";
+import { DB } from "https://deno.land/x/sqlite@v3.4.0/mod.ts"
 import Store from './Store.ts'
 import { SessionData } from '../Session.ts'
 
@@ -15,7 +15,7 @@ export default class SqliteStore implements Store {
   sessionExists(sessionId : string) {
     let session = ''
     
-    for (const [sess] of this.db.query(`SELECT data FROM ${this.tableName} WHERE id = ?`, [sessionId])) {
+    for (const [sess] of this.db.query<string[]>(`SELECT data FROM ${this.tableName} WHERE id = ?`, [sessionId])) {
       session = sess
     }
 
@@ -25,7 +25,7 @@ export default class SqliteStore implements Store {
   getSessionById(sessionId : string) {
     let session = ''
     
-    for (const [sess] of this.db.query(`SELECT data FROM ${this.tableName} WHERE id = ?`, [sessionId])) {
+    for (const [sess] of this.db.query<string[]>(`SELECT data FROM ${this.tableName} WHERE id = ?`, [sessionId])) {
       session = sess
     }
 

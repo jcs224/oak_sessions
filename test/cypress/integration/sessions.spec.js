@@ -1,53 +1,42 @@
 describe('Sessions Test', () => {
-  it('Check for correct session value on page refresh', () => {
+  it('logs in a user after a couple of mistakes', () => {
+    // 1st failed login attempt
     cy.visit('http://localhost:8002')
-      .contains('First counter: 0')
-      .contains('Second counter: 0')
-      .contains('FIRST FLASH!!')
+    cy.get('#email').type('test@test.com')
+    cy.get('#password').type('incorrect')
+    cy.get('#login').submit()
+    cy.contains('Incorrect username or password') // flash
+    cy.contains('Failed login attempts: 1')       // session
 
-    cy.get('#inc-button').click()
-    cy.contains('First counter: 1')
-    .contains('Second counter: 0')
-    .should('not.contain', 'FLASH!!')
+    // Refresh page, 2nd failed login attempt
+    cy.visit('http://localhost:8002')
+      .contains('Failed login attempts: 1')
+      .should('not.contain', 'Incorrect username or password') // flash is consumed
+    cy.get('#email').type('test@test.com')
+    cy.get('#password').type('wrong')
+    cy.get('#login').submit()
 
-    cy.get('#inc-button').click()
-    cy.contains('First counter: 2')
-    .contains('Second counter: 0')
-    .should('not.contain', 'FLASH!!')
+    cy.contains('Incorrect username or password') // flash
+    cy.contains('Failed login attempts: 2')       // session
 
-    cy.get('#inc-button-2').click()
-    cy.contains('First counter: 2')
-    .contains('Second counter: 1')
-    .should('not.contain', 'FLASH!!')
+    // 3rd login attempt - successful
+    cy.get('#email').type('test@test.com')
+    cy.get('#password').type('correct')
+    cy.get('#login').submit()
+    cy.contains('Login successful') // flash
 
-    cy.get('#inc-button-2').click()
-    cy.contains('First counter: 2')
-    .contains('Second counter: 2')
-    .should('not.contain', 'FLASH!!')
+    // Refresh page and log out
+    cy.visit('http://localhost:8002')
+      .contains('Log out test@test.com')
+      .should('not.contain', 'Login successful') // flash is consumed
+    cy.get('#logout').submit()
 
-    cy.get('#inc-button-2').click()
-    cy.contains('First counter: 2')
-    .contains('Second counter: 3')
-    .should('not.contain', 'FLASH!!')
-
-    cy.get('#inc-button').click()
-    cy.contains('First counter: 3')
-    .contains('Second counter: 3')
-    .contains('FLASH!!')
-
-    cy.get('#inc-button').click()
-    cy.contains('First counter: 4')
-    .contains('Second counter: 3')
-    .should('not.contain', 'FLASH!!')
-
-    cy.get('#inc-button').click()
-    cy.contains('First counter: 5')
-    .contains('Second counter: 3')
-    .should('not.contain', 'FLASH!!')
-
-    cy.get('#del-button').click()
-    cy.contains('First counter: 0')
-    .contains('Second counter: 0')
-    .contains('FLASH!!')
+    // One last failed login attempt
+    cy.visit('http://localhost:8002')
+    cy.get('#email').type('test@test.com')
+    cy.get('#password').type('incorrect')
+    cy.get('#login').submit()
+    cy.contains('Incorrect username or password')
+    cy.contains('Failed login attempts: 1')
   })
 })
