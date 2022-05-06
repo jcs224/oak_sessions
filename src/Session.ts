@@ -189,6 +189,7 @@ export default class Session {
       } else {
         const value = session['_flash'][key]
         delete session['_flash'][key]
+        await this.persistSessionData(this.context.state.sessionID, session, true)
         return value
       }
     } else {
