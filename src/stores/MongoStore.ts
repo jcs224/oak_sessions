@@ -1,10 +1,15 @@
 import Store from './Store.ts'
 import type { Database, Collection } from "https://deno.land/x/mongo@v0.29.4/mod.ts";
-import { SessionData } from '../Session.ts'
+import type { SessionData } from '../Session.ts'
+
+interface MongoSession {
+  id: string,
+  data: SessionData   
+}
 
 export default class MongoStore implements Store {
   db: Database
-  sessions: Collection<any>
+  sessions: Collection<MongoSession>
 
   constructor(db : Database, collectionName = 'sessions') {
     this.db = db
@@ -20,7 +25,7 @@ export default class MongoStore implements Store {
   async getSessionById(sessionId : string) {
     const session = await this.sessions.findOne({ id: sessionId })
 
-    return session
+    return session ? session.data : null
   }
 
   createSession(sessionId : string, initialData : SessionData) {
@@ -28,7 +33,7 @@ export default class MongoStore implements Store {
       { id: sessionId },
       {
         id: sessionId,
-        ...initialData
+        data: initialData
       },
       { upsert: true }
     )
@@ -43,7 +48,7 @@ export default class MongoStore implements Store {
       { id: sessionId },
       {
         id: sessionId,
-        ...sessionData
+        data: sessionData
       },
       { upsert: true }
     )
