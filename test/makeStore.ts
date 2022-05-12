@@ -1,6 +1,7 @@
-import { CookieStore, MemoryStore, PostgresStore, RedisStore, SqliteStore, Store, WebdisStore } from "../mod.ts";
+import { CookieStore, MemoryStore, PostgresStore, RedisStore, SqliteStore, MongoStore, Store, WebdisStore } from "../mod.ts";
 import { connect as connectRedis } from "https://deno.land/x/redis@v0.25.5/mod.ts"
 import { DB as sqliteDB } from "https://deno.land/x/sqlite@v3.4.0/mod.ts"
+import { MongoClient } from "https://deno.land/x/mongo@v0.29.4/mod.ts";
 import postgres from "https://deno.land/x/postgresjs@v3.1.0/mod.js"
 
 export async function makeStore(): Promise<Store> {
@@ -31,6 +32,10 @@ export async function makeStore(): Promise<Store> {
       const store = new PostgresStore(sql)
       await store.initSessionsTable()
       return store
+    case 'mongo':
+      const client = new MongoClient()
+      const mongo = await client.connect("mongodb://localhost:27017")
+      return new MongoStore(mongo)
     default:
       return new MemoryStore()
   }

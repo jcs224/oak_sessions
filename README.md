@@ -98,6 +98,7 @@ You can specify the storage layer used to store session data. Here are the suppo
 * **SQLite**: Uses a SQLite database to store session data. Internally, the deno [sqlite](https://deno.land/x/sqlite) library is used to interact with a SQLite database. Requires filesystem access.
 * **Postgres**: Uses a Postgres database to store session data. Internally, the deno [postgres.js](https://deno.land/x/postgresjs) library is used to interact with a Postgres database. Requires a separate Postgres server.
 * **Redis**: Uses a Redis database to store session data. Internally, the deno [redis](https://deno.land/x/redis) library is used to interact with a Redis database. Requires a separate Redis server.
+* **Mongo**: Uses a Mongo database to store session data. Internally, the deno [mongo](https://deno.land/x/mongo) library is used to interact with MongoDB. Requires a separate MongoDB server.
 * **Webdis**: Uses a Webdis endpoint to store session data. Webdis is a Redis server which allows you to use Redis with an HTTP endpoint. This is ideal for serverless environments, or anywhere that only HTTP endpoints can be accessed (such as Deno Deploy). Requires a Webdis URL.
 
 By default, `MemoryStorage` is the storage driver, but you can (and should in production) use a more robust and persistent storage driver.
@@ -180,6 +181,27 @@ const redis = await connect({
 
 // pass redis connection into a new RedisStore. Optionally add a second string argument for a custom database prefix, default is 'session_'
 const store = new RedisStore(redis)
+
+// Attach sessions to middleware
+const session = new Session(store);
+
+// ...
+```
+
+### Mongo
+```ts
+import { Application, Router } from "https://deno.land/x/oak/mod.ts";
+import { Session, MongoStore } from "https://deno.land/x/oak_sessions/mod.ts";
+import { MongoClient } from "https://deno.land/x/mongo@v0.29.4/mod.ts";
+
+const app = new Application();
+
+// Create mongo connection or use an existing one
+const client = new MongoClient();
+const db = client.database('default');
+
+// Pass mongo connection into a new MongoStore. Optionally add a custom collection name as second string argument, default is 'sessions'
+const store = new MongoStore(db, 'optional_custom_collection_name');
 
 // Attach sessions to middleware
 const session = new Session(store);
