@@ -28,8 +28,8 @@ export default class MongoStore implements Store {
     return session ? session.data : null
   }
 
-  createSession(sessionId : string, initialData : SessionData) {
-    this.sessions.replaceOne(
+  async createSession(sessionId : string, initialData : SessionData) {
+    await this.sessions.replaceOne(
       { id: sessionId },
       {
         id: sessionId,
@@ -39,12 +39,12 @@ export default class MongoStore implements Store {
     )
   }
 
-  deleteSession(sessionId : string) {
-    this.sessions.deleteOne({ id: sessionId })
+  async deleteSession(sessionId : string) {
+    await this.sessions.deleteOne({ id: sessionId })
   }
 
-  persistSessionData(sessionId : string, sessionData : SessionData) {
-    this.sessions.replaceOne(
+  async persistSessionData(sessionId : string, sessionData : SessionData) {
+    await this.sessions.replaceOne(
       { id: sessionId },
       {
         id: sessionId,
