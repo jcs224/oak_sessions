@@ -1,4 +1,4 @@
-name: Build & Publish
+name: Test Sessions
 
 on:
   push:
