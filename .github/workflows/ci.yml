@@ -23,7 +23,7 @@ jobs:
         with:
           working-directory: ./test
           start: /home/runner/.deno/bin/deno run -A ./server.ts
-          config-file: cypress/integration/sessions.spec.js
+          spec: cypress/integration/sessions.spec.js
           wait-on: 'http://localhost:8002'
           browser: chrome
           headless: true
