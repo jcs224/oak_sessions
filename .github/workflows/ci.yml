@@ -3,7 +3,7 @@ name: Test Sessions
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   test-sessions:
