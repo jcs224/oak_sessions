@@ -22,7 +22,7 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           working-directory: ./test
-          start: /home/runner/.deno/bin/deno run -A ./test/server.ts
+          start: /home/runner/.deno/bin/deno run -A ./server.ts
           config-file: cypress/integration/sessions.spec.js
           wait-on: 'http://localhost:8002'
           browser: chrome
