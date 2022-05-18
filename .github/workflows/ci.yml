@@ -19,7 +19,7 @@ jobs:
         run: curl -fsSL https://deno.land/install.sh | sh
 
       - name: Copy Deno into test directory
-        run: chmod +x /root/.deno/bin/deno && mv /root/.deno/bin/deno ./test/deno
+        run: cp /root/.deno/bin/deno ./test/deno
 
       - name: Run Cypress tests
         uses: cypress-io/github-action@v2
