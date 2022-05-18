@@ -15,15 +15,20 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v2
       
+      - name: Install tmux
+        run: sudo apt-get update && sudo apt-get install -y tmux
+
       - name: Install Deno
         run: curl -fsSL https://deno.land/install.sh | sh
-      
-      - name: Cypress run
+
+      - name: Boot Deno test server
+        run: tmux new-session -d -s session_test_server '/root/.deno/bin/deno run -A ./test/server.ts'
+
+      - name: Run Cypress tests
         uses: cypress-io/github-action@v2
         with:
           working-directory: ./test
           config-file: cypress/integration/sessions.spec.js
-          start: /root/.deno/bin/deno run -A test/server.ts
           wait-on: 'http://localhost:8002'
           browser: chrome
           headless: true
