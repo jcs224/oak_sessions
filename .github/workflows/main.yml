@@ -1,0 +1,20 @@
+name: Build & Publish
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test-sessions:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Deno
+    run: curl -fsSL https://deno.land/install.sh | sh
+    - name: Install Cypress dependencies
+    run: cd test && npm install && cd ../
+    - name: Boot up Deno test server
+    run: deno run -A test/server.ts
+    - name: Run Cypress tests
+    run: cd test && npx cypress run --spec "cypress/integration/sessions.spec.js"
