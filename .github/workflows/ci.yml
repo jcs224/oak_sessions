@@ -18,14 +18,11 @@ jobs:
       - name: Install Deno
         run: curl -fsSL https://deno.land/install.sh | sh
 
-      - name: Copy Deno into test directory
-        run: cp /root/.deno/bin/deno ./test/deno
-
       - name: Run Cypress tests
         uses: cypress-io/github-action@v2
         with:
           working-directory: ./test
-          start: ./deno run -A ./test/server.ts
+          start: /home/runner/.deno/bin/deno run -A ./test/server.ts
           config-file: cypress/integration/sessions.spec.js
           wait-on: 'http://localhost:8002'
           browser: chrome
