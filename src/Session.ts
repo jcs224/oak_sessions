@@ -16,6 +16,7 @@ export interface SessionData {
   _flash: Record<string, unknown>
   _accessed: string | null
   _expire: string | null
+  _delete: boolean
   [key: string]: unknown
 }
 
@@ -78,6 +79,10 @@ export default class Session {
       if (typeof this.store.afterMiddlewareHook !== 'undefined') {
         await this.store.afterMiddlewareHook()
       }
+
+      if (ctx.state.sessionCache._delete === true) {
+        await this.store.deleteSession(ctx.state.sessionID)
+      }
     }
   }
 
@@ -95,6 +100,11 @@ export default class Session {
     }
   }
 
+  async shouldDeleteSession(id : string) {
+    const session = await this.getSession(id) as SessionData
+    return session.hasOwnProperty('_delete') && session['_delete'] === true
+  } 
+
   async reupSession(id : string) {
     const session = await this.getSession(id) as SessionData
     session._expire = this.expiration ? DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO() : null
@@ -105,7 +115,8 @@ export default class Session {
     const session = {
       '_flash': {},
       '_accessed': DateTime.now().setZone('UTC').toISO(),
-      '_expire': this.expiration ? DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO() : null
+      '_expire': this.expiration ? DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO() : null,
+      '_delete': false
     }
 
     const newID = await nanoid(21)
@@ -163,6 +174,10 @@ export default class Session {
       }
     } else {
       if (this.context instanceof Context && this.context.state.sessionID) {
+        const sessionToDelete = await this.getSession(this.context.state.sessionID) as SessionData
+        sessionToDelete['_delete'] = true
+        await this.persistSessionData('_delete', sessionToDelete)
+
         await this.store.deleteSession(this.context.state.sessionID)
       }
     }
