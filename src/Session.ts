@@ -100,11 +100,6 @@ export default class Session {
     }
   }
 
-  async shouldDeleteSession(id : string) {
-    const session = await this.getSession(id) as SessionData
-    return session.hasOwnProperty('_delete') && session['_delete'] === true
-  } 
-
   async reupSession(id : string) {
     const session = await this.getSession(id) as SessionData
     session._expire = this.expiration ? DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO() : null
