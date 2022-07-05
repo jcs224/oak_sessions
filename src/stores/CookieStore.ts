@@ -1,7 +1,12 @@
 import CryptoJS from 'https://cdn.skypack.dev/crypto-js@4.1.1'
 import Store from './Store.ts'
-import type { Context } from '../../deps.ts'
+import type { Context, CookiesGetOptions, CookiesSetDeleteOptions } from '../../deps.ts'
 import { SessionData } from '../Session.ts'
+
+interface CookieStoreOptions {
+  cookieGetOptions?: CookiesGetOptions;
+  cookieSetDeleteOptions?: CookiesSetDeleteOptions;
+}
 
 export default class CookieStore implements Store{
   data: SessionData | null
@@ -9,16 +14,22 @@ export default class CookieStore implements Store{
   encryptionKey: string | null
   context : Context | null
 
-  constructor(encryptionKey : string | null = null) {
+  cookieGetOptions: CookiesGetOptions;
+  cookieSetDeleteOptions: CookiesSetDeleteOptions;
+
+  constructor(encryptionKey : string | null = null, options? : CookieStoreOptions) {
     this.data = null
     this.encryptionKey = encryptionKey
     this.context = null
+
+    this.cookieGetOptions = options?.cookieGetOptions ?? {}
+    this.cookieSetDeleteOptions = options?.cookieSetDeleteOptions ?? {}
   }
 
   async insertSessionMiddlewareContext(ctx : Context) {
     this.context = ctx
 
-    const sessionDataString : string | undefined = await this.context.cookies.get('session_data')
+    const sessionDataString : string | undefined = await this.context.cookies.get('session_data', this.cookieGetOptions)
 
     if (await this.sessionExists()) {
       if (this.encryptionKey) {
@@ -50,11 +61,11 @@ export default class CookieStore implements Store{
   }
 
   async sessionExists() {
-    return await this.context?.cookies.get('session_data') ? true : false
+    return await this.context?.cookies.get('session_data', this.cookieGetOptions) ? true : false
   }
 
   async getSessionById() {
-    return await this.context?.cookies.get('session_data') ? this.data : null
+    return await this.context?.cookies.get('session_data', this.cookieGetOptions) ? this.data : null
   }
 
   createSession(id : string, initialData : SessionData) {
@@ -62,7 +73,7 @@ export default class CookieStore implements Store{
   }
 
   async deleteSession(ctx : Context) {
-    await this.context?.cookies.delete('session_data')
+    await this.context?.cookies.delete('session_data', this.cookieSetDeleteOptions)
   }
 
   persistSessionData(id : string, sessionData : SessionData) {
@@ -72,9 +83,9 @@ export default class CookieStore implements Store{
   async afterMiddlewareHook() {
     if (this.encryptionKey) {
       let cipherText = CryptoJS.AES.encrypt(JSON.stringify(this.data), this.encryptionKey).toString()
-      await this.context?.cookies.set('session_data', cipherText)
+      await this.context?.cookies.set('session_data', cipherText, this.cookieSetDeleteOptions)
     } else {
-      await this.context?.cookies.set('session_data', JSON.stringify(this.data))
+      await this.context?.cookies.set('session_data', JSON.stringify(this.data), this.cookieSetDeleteOptions)
     }
   }
 }
