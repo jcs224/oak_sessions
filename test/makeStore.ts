@@ -4,10 +4,10 @@ import { DB as sqliteDB } from "https://deno.land/x/sqlite@v3.4.0/mod.ts"
 import { MongoClient } from "https://deno.land/x/mongo@v0.29.4/mod.ts";
 import postgres from "https://deno.land/x/postgresjs@v3.1.0/mod.js"
 
-export async function makeStore(): Promise<Store> {
+export async function makeStore(): Promise<Store | CookieStore> {
   switch(Deno.env.get('STORE')) {
     case 'cookie':
-      return new CookieStore('a-secret-key')
+      return new CookieStore('qwqwq')
     case 'sqlite':
       const sqlite = new sqliteDB('./database.db')
       return new SqliteStore(sqlite)
