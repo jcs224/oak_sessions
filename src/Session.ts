@@ -7,7 +7,7 @@ import { DateTime } from 'https://jspm.dev/luxon@2.0.2'
 import type { CookiesGetOptions, CookiesSetDeleteOptions } from '../deps.ts'
 
 interface SessionOptions {
-  expireAfterSeconds?: number
+  expireAfterSeconds?: number | null
   cookieGetOptions?: CookiesGetOptions
   cookieSetOptions?: CookiesSetDeleteOptions
 }
@@ -21,10 +21,6 @@ export interface SessionData {
 }
 
 export default class Session {
-  static store: Store | CookieStore = new MemoryStore()
-  static expiration: number | null = null
-  static cookieSetOptions: CookiesSetDeleteOptions = {}
-  static cookieGetOptions: CookiesGetOptions = {}
 
   sid: string
   // user should interact with data using `get(), set(), flash(), has()`
@@ -40,32 +36,37 @@ export default class Session {
     this.ctx = ctx
   }
 
-  static initMiddleware() {
+  static initMiddleware(store: Store | CookieStore = new MemoryStore(), {
+    expireAfterSeconds = null,
+    cookieGetOptions = {},
+    cookieSetOptions = {}
+  }: SessionOptions = {}) {
+  
     return async (ctx : Context, next : () => Promise<unknown>) => {
       // get sessionId from cookie
-      const sid = await ctx.cookies.get('session', this.cookieGetOptions)
+      const sid = await ctx.cookies.get('session', cookieGetOptions)
       let session: Session;
 
       if (sid) {
         // load session data from store
-        const sessionData = this.store instanceof CookieStore ? await this.store.getSessionByCtx(ctx) : await this.store.getSessionById(sid)
+        const sessionData = store instanceof CookieStore ? await store.getSessionByCtx(ctx) : await store.getSessionById(sid)
 
         if (sessionData) {
           // load success, check if it's valid (not expired)
           if (this.sessionValid(sessionData)) {
             session = new Session(sid, sessionData, ctx);
-            await session.reupSession();
+            await session.reupSession(store, expireAfterSeconds);
           } else {
             // invalid session
-            this.store instanceof CookieStore ? this.store.deleteSession(ctx) : await this.store.deleteSession(sid)
-            session = await this.createSession(ctx)
+            store instanceof CookieStore ? store.deleteSession(ctx) : await store.deleteSession(sid)
+            session = await this.createSession(ctx, store, expireAfterSeconds)
           }
         } else {
-          session = await this.createSession(ctx)
+          session = await this.createSession(ctx, store, expireAfterSeconds)
         }
 
       } else {
-        session = await this.createSession(ctx)
+        session = await this.createSession(ctx, store, expireAfterSeconds)
       }
 
       // store session to ctx.state so user can interact (set, get) with it
@@ -73,16 +74,16 @@ export default class Session {
 
       // update _access time
       session.set('_accessed', DateTime.now().setZone('UTC').toISO())
-      await ctx.cookies.set('session', session.sid, this.cookieSetOptions)
+      await ctx.cookies.set('session', session.sid, cookieSetOptions)
 
 
       await next()
 
       // request done, push session data to store
-      await session.persistSessionData()
+      await session.persistSessionData(store)
 
       if (session.data._delete) {
-        this.store instanceof CookieStore ? this.store.deleteSession(ctx) : await this.store.deleteSession(session.sid)
+        store instanceof CookieStore ? store.deleteSession(ctx) : await store.deleteSession(session.sid)
       }
     }
   }
@@ -93,22 +94,22 @@ export default class Session {
   }
 
   // should only be called in `initMiddleware()`
-  private async reupSession() {
-    this.data._expire = Session.expiration ? DateTime.now().setZone('UTC').plus({ seconds: Session.expiration }).toISO() : null
-    await this.persistSessionData()
+  private async reupSession(store : Store | CookieStore, expiration : number | null | undefined) {
+    this.data._expire = expiration ? DateTime.now().setZone('UTC').plus({ seconds: expiration }).toISO() : null
+    await this.persistSessionData(store)
   }
 
   // should only be called in `initMiddleware()` when creating a new session
-  private static async createSession(ctx : Context) : Promise<Session> {
+  private static async createSession(ctx : Context, store : Store | CookieStore, expiration : number | null | undefined) : Promise<Session> {
     const sessionData = {
       '_flash': {},
       '_accessed': DateTime.now().setZone('UTC').toISO(),
-      '_expire': this.expiration ? DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO() : null,
+      '_expire': expiration ? DateTime.now().setZone('UTC').plus({ seconds: expiration }).toISO() : null,
       '_delete': false
     }
 
     const newID = await nanoid(21)
-    this.store instanceof CookieStore ? await this.store.createSession(ctx, sessionData) : await this.store.createSession(newID, sessionData)
+    store instanceof CookieStore ? await store.createSession(ctx, sessionData) : await store.createSession(newID, sessionData)
 
     return new Session(newID, sessionData, ctx)
   }
@@ -117,13 +118,12 @@ export default class Session {
   // should be called by user using `ctx.state.session.deleteSession()`
   async deleteSession() : Promise<void> {
     this.data._delete = true
-    await this.persistSessionData()
   }
 
   // push current session data to Session.store
   // ctx is needed for CookieStore
-  private persistSessionData(): Promise<void> | void {
-    return Session.store instanceof CookieStore ? Session.store.persistSessionData(this.ctx, this.data) : Session.store.persistSessionData(this.sid, this.data)
+  private persistSessionData(store : Store | CookieStore): Promise<void> | void {
+    return store instanceof CookieStore ? store.persistSessionData(this.ctx, this.data) : store.persistSessionData(this.sid, this.data)
   }
 
   // Methods exposed for users to manipulate session data

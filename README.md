@@ -109,7 +109,7 @@ const app = new Application();
 const store = new CookieStore('very-secret-key')
 
 // Attach sessions to middleware
-Session.store = store;
+app.use(Session.initMiddleware(store));
 
 // ...
 ```
@@ -126,7 +126,7 @@ const sqlite = new DB('./database.db')
 const store = new SqliteStore(sqlite, 'optional_custom_table_name')
 
 // Attach sessions to middleware. 
-Session.store = store;
+app.use(Session.initMiddleware(store))
 
 // ...
 ```
@@ -155,7 +155,7 @@ const store = new PostgresStore(sql, 'optional_custom_table_name')
 await store.initSessionsTable()
 
 // Attach sessions to middleware
-Session.store = store;
+app.use(Session.initMiddleware(store));
 
 // ...
 ```
@@ -180,7 +180,7 @@ const redis = await connect({
 const store = new RedisStore(redis)
 
 // Attach sessions to middleware
-const session = new Session(store);
+app.use(Session.initMiddleware(store));
 
 // ...
 ```
@@ -201,7 +201,7 @@ const db = client.database('default');
 const store = new MongoStore(db, 'optional_custom_collection_name');
 
 // Attach sessions to middleware
-const session = new Session(store);
+app.use(Session.initMiddleware(store));
 
 // ...
 ```
@@ -217,7 +217,7 @@ const store = new WebdisStore({
 });
 
 // Attach sessions to middleware
-const session = new Session(store);
+app.use(Session.initMiddleware(store));
 
 // ...
 ```
@@ -230,10 +230,12 @@ Whichever store you are using, a session id is requred to be saved in cookie so 
 You can modified the options used when setting / deleting session id in cookie. Note that this option is different from options in `CookieStore`.
 
 ```ts
-Session.cookieSetOptions = {
-    httpOnly: true,
-    sameSite: "none",
-    secure: true
-};
-Session.cookieGetOptions = {};
+app.use(Session.initMiddleware(store, {
+    cookieSetOptions: {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true
+    },
+    cookieGetOptions: {}
+}))
 ```

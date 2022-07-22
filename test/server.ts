@@ -15,11 +15,14 @@ const router = new Router<AppState>();
 
 // Instantiate session
 const store = await makeStore()
-Session.store = store;
 // const session = new Session(store)
 
 // Apply sessions to your Oak application. You can also apply the middleware to specific routes instead of the whole app.
-app.use(Session.initMiddleware())
+app.use(Session.initMiddleware(store, {
+    cookieSetOptions: {
+        sameSite: 'lax'
+    }
+}))
 
 router.post('/login', async (ctx) => {
     const form = await ctx.request.body({type: 'form'}).value
