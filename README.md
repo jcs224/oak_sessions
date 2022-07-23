@@ -20,24 +20,21 @@ app.addEventListener('error', (evt) => {
 
 const router = new Router<AppState>();
 
-// Instantiate session
-const session = new Session()
-
 // Apply sessions to your Oak application. You can also apply the middleware to specific routes instead of the whole app.
-app.use(session.initMiddleware())
+app.use(Session.initMiddleware())
 
 router.post('/login', async (ctx) => {
     const form = await ctx.request.body({type: 'form'}).value
     if(form.get('password') === 'correct') {
         // Set persistent data in the session
-        await ctx.state.session.set('email', form.get('email'))
-        await ctx.state.session.set('failed-login-attempts', null)
+        ctx.state.session.set('email', form.get('email'))
+        ctx.state.session.set('failed-login-attempts', null)
         // Set flash data in the session. This will be removed the first time it's accessed with get
-        await ctx.state.session.flash('message', 'Login successful')
+        ctx.state.session.flash('message', 'Login successful')
     } else {
         const failedLoginAttempts = (await ctx.state.session.get('failed-login-attempts') || 0) as number
-        await ctx.state.session.set('failed-login-attempts', failedLoginAttempts+1)
-        await ctx.state.session.flash('error', 'Incorrect username or password')
+        ctx.state.session.set('failed-login-attempts', failedLoginAttempts+1)
+        ctx.state.session.flash('error', 'Incorrect username or password')
     }
     ctx.response.redirect('/')
 })
@@ -112,7 +109,7 @@ const app = new Application();
 const store = new CookieStore('very-secret-key')
 
 // Attach sessions to middleware
-const session = new Session(store);
+Session.store = store;
 
 // ...
 ```
@@ -129,7 +126,7 @@ const sqlite = new DB('./database.db')
 const store = new SqliteStore(sqlite, 'optional_custom_table_name')
 
 // Attach sessions to middleware. 
-const session = new Session(store);
+Session.store = store;
 
 // ...
 ```
@@ -158,7 +155,7 @@ const store = new PostgresStore(sql, 'optional_custom_table_name')
 await store.initSessionsTable()
 
 // Attach sessions to middleware
-const session = new Session(store)
+Session.store = store;
 
 // ...
 ```
@@ -226,3 +223,17 @@ const session = new Session(store);
 ```
 
 More stores will be added over time.
+
+## Cookie
+
+Whichever store you are using, a session id is requred to be saved in cookie so incoming requests can be identified.
+You can modified the options used when setting / deleting session id in cookie. Note that this option is different from options in `CookieStore`.
+
+```ts
+Session.cookieSetOptions = {
+    httpOnly: true,
+    sameSite: "none",
+    secure: true
+};
+Session.cookieGetOptions = {};
+```

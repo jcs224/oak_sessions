@@ -1,8 +1,8 @@
 import { nanoid } from 'https://deno.land/x/nanoid@v3.0.0/async.ts'
 import MemoryStore from './stores/MemoryStore.ts'
 import CookieStore from './stores/CookieStore.ts'
-import { Context } from '../deps.ts'
-import Store from './stores/Store.ts'
+import type { Context } from '../deps.ts'
+import type Store from './stores/Store.ts'
 import { DateTime } from 'https://jspm.dev/luxon@2.0.2'
 import type { CookiesGetOptions, CookiesSetDeleteOptions } from '../deps.ts'
 
@@ -21,93 +21,86 @@ export interface SessionData {
 }
 
 export default class Session {
-  context: Context | null
-  store: Store
-  expiration: number | null
-  cookieSetOptions: CookiesSetDeleteOptions
-  cookieGetOptions: CookiesGetOptions
+  static store: Store | CookieStore = new MemoryStore()
+  static expiration: number | null = null
+  static cookieSetOptions: CookiesSetDeleteOptions = {}
+  static cookieGetOptions: CookiesGetOptions = {}
 
-  constructor (store : Store = new MemoryStore, options? : SessionOptions) {
-    this.context = null
-    this.store = store
-    this.expiration = options && options.expireAfterSeconds ? options.expireAfterSeconds : null
-    this.cookieGetOptions = options?.cookieGetOptions ?? {}
-    this.cookieSetOptions = options?.cookieSetOptions ?? {}
+  sid: string
+  // user should interact with data using `get(), set(), flash(), has()`
+  private data: SessionData
+  private ctx: Context
+
+  // construct a Session with no data and id
+  // private: force user to create session in initMiddleware()
+  private constructor (sid : string, data : SessionData, ctx : Context) {
+
+    this.sid = sid
+    this.data = data
+    this.ctx = ctx
   }
 
-  initMiddleware() {
+  static initMiddleware() {
     return async (ctx : Context, next : () => Promise<unknown>) => {
-      this.context = ctx
-
-      if (typeof this.store.insertSessionMiddlewareContext !== 'undefined') {
-        await this.store.insertSessionMiddlewareContext(ctx)
-      }
-
+      // get sessionId from cookie
       const sid = await ctx.cookies.get('session', this.cookieGetOptions)
-      ctx.state.session = this
-      ctx.state.sessionCache = null
+      let session: Session;
 
       if (sid) {
-        const session = await this.getSession(sid, true)
+        // load session data from store
+        const sessionData = this.store instanceof CookieStore ? await this.store.getSessionByCtx(ctx) : await this.store.getSessionById(sid)
 
-        if (session) {
-          if (await this.sessionValid(sid)) {
-            await this.reupSession(sid)
-            ctx.state.sessionID = sid
+        if (sessionData) {
+          // load success, check if it's valid (not expired)
+          if (this.sessionValid(sessionData)) {
+            session = new Session(sid, sessionData, ctx);
+            await session.reupSession();
           } else {
-            await this.deleteSession(sid)
-            ctx.state.sessionID = await this.createSession()
+            // invalid session
+            this.store instanceof CookieStore ? this.store.deleteSession(ctx) : await this.store.deleteSession(sid)
+            session = await this.createSession(ctx)
           }
         } else {
-          ctx.state.sessionID = await this.createSession()
+          session = await this.createSession(ctx)
         }
+
       } else {
-        ctx.state.sessionID = await this.createSession()
+        session = await this.createSession(ctx)
       }
 
-      await this.set('_accessed', DateTime.now().setZone('UTC').toISO())
-      await ctx.cookies.set('session', ctx.state.sessionID, this.cookieSetOptions)
+      // store session to ctx.state so user can interact (set, get) with it
+      ctx.state.session = session;
+
+      // update _access time
+      session.set('_accessed', DateTime.now().setZone('UTC').toISO())
+      await ctx.cookies.set('session', session.sid, this.cookieSetOptions)
+
 
       await next()
 
-      await this.persistSessionData(
-        ctx.state.sessionID, 
-        await this.getSession(ctx.state.sessionID) as SessionData, 
-        true
-      )
+      // request done, push session data to store
+      await session.persistSessionData()
 
-      if (typeof this.store.afterMiddlewareHook !== 'undefined') {
-        await this.store.afterMiddlewareHook()
-      }
-
-      if (ctx.state.sessionCache._delete === true) {
-        await this.store.deleteSession(ctx.state.sessionID)
+      if (session.data._delete) {
+        this.store instanceof CookieStore ? this.store.deleteSession(ctx) : await this.store.deleteSession(session.sid)
       }
     }
   }
 
-  async sessionValid(id : string) {
-    const session = await this.getSession(id) as SessionData
-
-    if (this.expiration) {
-      if (DateTime.now() < DateTime.fromISO(session._expire)) {
-        return true
-      } else {
-        return false
-      }
-    } else {
-      return true
-    }
+  // should only be called in `initMiddleware()` when validating session data
+  private static sessionValid(sessionData: SessionData) {
+    return sessionData._expire == null || DateTime.now() < DateTime.fromISO(sessionData._expire);
   }
 
-  async reupSession(id : string) {
-    const session = await this.getSession(id) as SessionData
-    session._expire = this.expiration ? DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO() : null
-    await this.persistSessionData(id, session)
+  // should only be called in `initMiddleware()`
+  private async reupSession() {
+    this.data._expire = Session.expiration ? DateTime.now().setZone('UTC').plus({ seconds: Session.expiration }).toISO() : null
+    await this.persistSessionData()
   }
 
-  async createSession() {
-    const session = {
+  // should only be called in `initMiddleware()` when creating a new session
+  private static async createSession(ctx : Context) : Promise<Session> {
+    const sessionData = {
       '_flash': {},
       '_accessed': DateTime.now().setZone('UTC').toISO(),
       '_expire': this.expiration ? DateTime.now().setZone('UTC').plus({ seconds: this.expiration }).toISO() : null,
@@ -115,117 +108,49 @@ export default class Session {
     }
 
     const newID = await nanoid(21)
-    await this.store.createSession(newID, session)
-    if (this.context) this.context.state.sessionCache = session
+    this.store instanceof CookieStore ? await this.store.createSession(ctx, sessionData) : await this.store.createSession(newID, sessionData)
 
-    return newID
+    return new Session(newID, sessionData, ctx)
   }
 
-  async getSession(id : string, pullFromStore : boolean = false): Promise<SessionData | null> {
-    let session = null
+  // set _delete to true, will be deleted in middleware
+  // should be called by user using `ctx.state.session.deleteSession()`
+  async deleteSession() : Promise<void> {
+    this.data._delete = true
+    await this.persistSessionData()
+  }
 
-    if (pullFromStore) {
-      session = await this.store.getSessionById(id)
-      if (this.context) this.context.state.sessionCache = session
+  // push current session data to Session.store
+  // ctx is needed for CookieStore
+  private persistSessionData(): Promise<void> | void {
+    return Session.store instanceof CookieStore ? Session.store.persistSessionData(this.ctx, this.data) : Session.store.persistSessionData(this.sid, this.data)
+  }
+
+  // Methods exposed for users to manipulate session data
+
+  get(key : string) {
+    if (key in this.data) {
+      return this.data[key]
     } else {
-      if (this.context && this.context.state.sessionCache) {
-        session = this.context.state.sessionCache
-      } else {
-        session = await this.store.getSessionById(id)
-      }
+      const value = this.data['_flash'][key]
+      delete this.data['_flash'][key]
+      return value
     }
+  }
 
-    if (session) {
-      return session
+  set(key : string, value : unknown) {
+    if(value === null || value === undefined) {
+      delete this.data[key]
     } else {
-      return null
+      this.data[key] = value
     }
   }
 
-  async deleteSession(sessionIdOrContext? : string | Context) {
-
-    if (sessionIdOrContext) { // If an argument was supplied
-      if (typeof sessionIdOrContext == 'string') { // session ID string supplied
-        await this.store.deleteSession(sessionIdOrContext)
-      } else if (sessionIdOrContext instanceof Context) { // Oak context supplied
-        const sessionID = await sessionIdOrContext.cookies.get('session', this.cookieGetOptions)
-        if (sessionID) {
-          await this.store.deleteSession(sessionID)
-        }
-      }
-    } else { // No argument supplied, assume within session middleware
-      let session = await this.getSession(this.context?.state.sessionID) as SessionData
-      session['_delete'] = true
-      await this.persistSessionData('_delete', session)
-    }
-
-    this.context?.cookies.delete('session', this.cookieSetOptions)
+  flash(key : string, value : unknown) {
+    this.data['_flash'][key] = value
   }
 
-  async persistSessionData(id : string, data: SessionData, pushToStore : boolean = false) {
-    if (this.context) this.context.state.sessionCache = data
-
-    if (pushToStore) {
-      await this.store.persistSessionData(id, data)
-    }
-  }
-
-  async get(key : string) {
-    if (this.context) {
-      const session = await this.getSession(this.context.state.sessionID) as SessionData
-
-      if (session.hasOwnProperty(key)) {
-        return session[key]
-      } else {
-        const value = session['_flash'][key]
-        delete session['_flash'][key]
-        await this.persistSessionData(this.context.state.sessionID, session, true)
-        return value
-      }
-    } else {
-      return null
-    }
-  }
-
-  async set(key : string, value : unknown) {
-    if (this.context) {
-      const session = await this.getSession(this.context.state.sessionID) as SessionData
-
-      if(value === null || value === undefined) {
-        delete session[key]
-      } else {
-        session[key] = value
-      }
-
-      await this.persistSessionData(this.context.state.sessionID, session)
-    }
-  }
-
-  async flash(key : string, value : unknown) {
-    if (this.context) {
-      const session = await this.getSession(this.context.state.sessionID) as SessionData
-
-      session['_flash'][key] = value
-
-      await this.persistSessionData(this.context.state.sessionID, session)
-    }
-  }
-
-  async has(key : string) {
-    if (this.context) {
-      const session = await this.getSession(this.context.state.sessionID) as SessionData
-
-      if (session.hasOwnProperty(key)) {
-        return true
-      } else {
-        if (session['_flash'].hasOwnProperty(key)) {
-          return true
-        } else {
-          return false
-        }
-      }
-    } else {
-      return false
-    }
+  has(key : string) {
+    return key in this.data || key in this.data['_flash'];
   }
 }
