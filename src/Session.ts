@@ -3,7 +3,6 @@ import MemoryStore from './stores/MemoryStore.ts'
 import CookieStore from './stores/CookieStore.ts'
 import type { Context } from '../deps.ts'
 import type Store from './stores/Store.ts'
-import { DateTime } from 'https://jspm.dev/luxon@2.0.2'
 import type { CookiesGetOptions, CookiesSetDeleteOptions } from '../deps.ts'
 
 interface SessionOptions {
@@ -73,7 +72,7 @@ export default class Session {
       ctx.state.session = session;
 
       // update _access time
-      session.set('_accessed', DateTime.now().setZone('UTC').toISO())
+      session.set('_accessed', new Date().toISOString())
       await ctx.cookies.set('session', session.sid, cookieSetOptions)
 
 
@@ -90,12 +89,13 @@ export default class Session {
 
   // should only be called in `initMiddleware()` when validating session data
   private static sessionValid(sessionData: SessionData) {
-    return sessionData._expire == null || DateTime.now() < DateTime.fromISO(sessionData._expire);
+    return sessionData._expire == null || Date.now() < new Date(sessionData._expire).getTime();
   }
 
   // should only be called in `initMiddleware()`
   private async reupSession(store : Store | CookieStore, expiration : number | null | undefined) {
-    this.data._expire = expiration ? DateTime.now().setZone('UTC').plus({ seconds: expiration }).toISO() : null
+    // expiration in seconds
+    this.data._expire = expiration ? new Date(Date.now() + expiration * 1000).toISOString() : null
     await this.persistSessionData(store)
   }
 
@@ -103,8 +103,8 @@ export default class Session {
   private static async createSession(ctx : Context, store : Store | CookieStore, expiration : number | null | undefined) : Promise<Session> {
     const sessionData = {
       '_flash': {},
-      '_accessed': DateTime.now().setZone('UTC').toISO(),
-      '_expire': expiration ? DateTime.now().setZone('UTC').plus({ seconds: expiration }).toISO() : null,
+      '_accessed': new Date().toISOString(),
+      '_expire': expiration ? new Date(Date.now() + expiration * 1000).toISOString() : null,
       '_delete': false
     }
 
