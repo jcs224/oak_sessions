@@ -1,4 +1,4 @@
-import CryptoJS from 'https://cdn.skypack.dev/crypto-js@4.1.1'
+import { encryptCryptoJSAES, decryptCryptoJSAES } from '../crypto.ts';
 import type { Context, CookiesGetOptions, CookiesSetDeleteOptions } from '../../deps.ts'
 import type { SessionData } from '../Session.ts'
 
@@ -27,10 +27,9 @@ export default class CookieStore {
 
     if (this.encryptionKey) {
       const rawString = sessionDataString
-      const bytes = CryptoJS.AES.decrypt(rawString, this.encryptionKey)
+      const decryptedCookie = await decryptCryptoJSAES(rawString, this.encryptionKey)
 
       try {
-        const decryptedCookie = bytes.toString(CryptoJS.enc.Utf8)
         return JSON.parse(decryptedCookie)
       } catch (_e) {
         return null
@@ -49,7 +48,7 @@ export default class CookieStore {
     let dataString = JSON.stringify(initialData)
 
     if (this.encryptionKey)
-      dataString = CryptoJS.AES.encrypt(dataString, this.encryptionKey).toString()
+      dataString = await encryptCryptoJSAES(dataString, this.encryptionKey)
     await ctx.cookies.set('session_data', dataString, this.cookieSetDeleteOptions)
   }
 
@@ -61,7 +60,7 @@ export default class CookieStore {
     let dataString = JSON.stringify(data)
 
     if (this.encryptionKey)
-      dataString = CryptoJS.AES.encrypt(dataString, this.encryptionKey).toString()
+      dataString = await encryptCryptoJSAES(dataString, this.encryptionKey)
     await ctx.cookies.set('session_data', dataString, this.cookieSetDeleteOptions)
   }
 }
