@@ -97,13 +97,13 @@ const EVPKDF = async (
 
   while (rawKey.byteLength < KEY_SIZE + IV_SIZE) {
     let buffer = await crypto.subtle.digest(
-      "MD5",
+      "SHA-384",
       concatUint8Array(block, passphrase, salt),
     );
 
     for (let i = 1; i < iterations; i++) {
       buffer = await crypto.subtle.digest(
-        "MD5",
+        "SHA-384",
         buffer,
       );
     }
