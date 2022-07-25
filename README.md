@@ -239,3 +239,8 @@ app.use(Session.initMiddleware(store, {
     cookieGetOptions: {}
 }))
 ```
+
+## Migrating from 3.x to 4.x
+There are some breaking changes in how you initialize your session, but all of the `ctx.state.session` methods (`get`, `set`, `flash`, `has`) still work as they did before, except `deleteSession` no longer takes any arguments, which may or may not be breaking depending on how it's used in your project.
+
+See more detail in the [migration guide](https://github.com/jcs224/oak_sessions/wiki/Migration-guide) wiki.
