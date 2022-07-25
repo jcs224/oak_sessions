@@ -27,7 +27,13 @@ export default class CookieStore {
 
     if (this.encryptionKey) {
       const rawString = sessionDataString
-      const decryptedCookie = await decryptCryptoJSAES(rawString, this.encryptionKey)
+      let decryptedCookie: string
+
+      try {
+        decryptedCookie = await decryptCryptoJSAES(rawString, this.encryptionKey)
+      } catch {
+        return null
+      }
 
       try {
         return JSON.parse(decryptedCookie)
