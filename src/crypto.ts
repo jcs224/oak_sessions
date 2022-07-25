@@ -1,3 +1,4 @@
+import { crypto } from "https://deno.land/std@0.149.0/crypto/mod.ts";
 import {
   decode as bd,
   encode as be,
