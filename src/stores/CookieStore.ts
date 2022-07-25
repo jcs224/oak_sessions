@@ -8,12 +8,12 @@ interface CookieStoreOptions {
 }
 
 export default class CookieStore {
-  encryptionKey: string | null
+  encryptionKey: string
 
   cookieGetOptions: CookiesGetOptions;
   cookieSetDeleteOptions: CookiesSetDeleteOptions;
 
-  constructor(encryptionKey : string | null = null, options? : CookieStoreOptions) {
+  constructor(encryptionKey : string, options? : CookieStoreOptions) {
     this.encryptionKey = encryptionKey
 
     this.cookieGetOptions = options?.cookieGetOptions ?? {}
@@ -25,37 +25,20 @@ export default class CookieStore {
 
     if (!sessionDataString) return null;
 
-    if (this.encryptionKey) {
-      const rawString = sessionDataString
-      let decryptedCookie: string
-
-      try {
-        decryptedCookie = await decryptCryptoJSAES(rawString, this.encryptionKey)
-      } catch {
-        return null
-      }
-
-      try {
-        return JSON.parse(decryptedCookie)
-      } catch (_e) {
-        return null
-      }
-        
-    } else {
-      try {
-        return typeof sessionDataString === 'string' ? JSON.parse(sessionDataString) : null
-      } catch (_e) {
-        return null
-      }
+    try {
+      const decryptedCookie = await decryptCryptoJSAES(sessionDataString, this.encryptionKey)
+      return JSON.parse(decryptedCookie)
+    } catch {
+      return null
     }
+
   }
 
   async createSession(ctx : Context, initialData : SessionData) {
-    let dataString = JSON.stringify(initialData)
+    const dataString = JSON.stringify(initialData)
 
-    if (this.encryptionKey)
-      dataString = await encryptCryptoJSAES(dataString, this.encryptionKey)
-    await ctx.cookies.set('session_data', dataString, this.cookieSetDeleteOptions)
+    const encryptedCookie = await encryptCryptoJSAES(dataString, this.encryptionKey)
+    await ctx.cookies.set('session_data', encryptedCookie, this.cookieSetDeleteOptions)
   }
 
   deleteSession(ctx : Context) {
@@ -63,10 +46,9 @@ export default class CookieStore {
   }
 
   async persistSessionData(ctx : Context, data : SessionData) {
-    let dataString = JSON.stringify(data)
+    const dataString = JSON.stringify(data)
 
-    if (this.encryptionKey)
-      dataString = await encryptCryptoJSAES(dataString, this.encryptionKey)
-    await ctx.cookies.set('session_data', dataString, this.cookieSetDeleteOptions)
+    const encryptedCookie = await encryptCryptoJSAES(dataString, this.encryptionKey)
+    await ctx.cookies.set('session_data', encryptedCookie, this.cookieSetDeleteOptions)
   }
 }

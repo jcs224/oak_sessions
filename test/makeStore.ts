@@ -7,7 +7,7 @@ import postgres from "https://deno.land/x/postgresjs@v3.1.0/mod.js"
 export async function makeStore(): Promise<Store | CookieStore> {
   switch(Deno.env.get('STORE')) {
     case 'cookie':
-      return new CookieStore('qwqwq')
+      return new CookieStore('mandatory-encryption-passphrase')
     case 'sqlite':
       const sqlite = new sqliteDB('./database.db')
       return new SqliteStore(sqlite)
