@@ -6,6 +6,9 @@ import {
 
 // Helper functions to encrypt / decrypt using AES with default config in CryptoJS
 
+// NOTE: Encryption will be using SHA-384 instead of MD5 in Key Derivation, so it can't be decrypted using CryptoJS
+// Decryption will try MD5 after SHA-384 generated key fails, so it can decrypt cipher text encrypted by CryptoJS
+
 // For CryptoJS cipher text:
 // It has a constant header for the first 8 byte.
 // It has the salt in the second 8 byte.
@@ -33,6 +36,7 @@ export const encryptCryptoJSAES = async (
   const { key, iv } = await EVPKDF(
     new TextEncoder().encode(passphrase),
     salt,
+    "SHA-384",
     iterations,
   );
 
@@ -67,14 +71,31 @@ export const decryptCryptoJSAES = async (
   const { key, iv } = await EVPKDF(
     new TextEncoder().encode(passphrase),
     salt,
+    "SHA-384",
     iterations,
   );
 
-  const plainText = await crypto.subtle.decrypt(
-    { name: "AES-CBC", iv },
-    key,
-    body,
-  );
+  let plainText: ArrayBuffer;
+  try {
+    plainText = await crypto.subtle.decrypt(
+      { name: "AES-CBC", iv },
+      key,
+      body,
+    );
+  } catch (_) {
+    const { key, iv } = await EVPKDF(
+      new TextEncoder().encode(passphrase),
+      salt,
+      "MD5",
+      iterations,
+    );
+
+    plainText = await crypto.subtle.decrypt(
+      { name: "AES-CBC", iv },
+      key,
+      body,
+    );
+  }
 
   return new TextDecoder().decode(plainText);
 };
@@ -87,9 +108,11 @@ const parseCryptoJSCipherText = (cipherText: Uint8Array): {
   body: cipherText.subarray(HEADER_SIZE + SALT_SIZE, cipherText.length),
 });
 
+// a customed version of EVPKDF using sha-384 instead of md5.
 const EVPKDF = async (
   passphrase: Uint8Array,
   salt: Uint8Array,
+  algorithm: "SHA-384" | "MD5",
   iterations: number,
 ): Promise<{ key: CryptoKey; iv: Uint8Array }> => {
   let rawKey = new Uint8Array();
@@ -97,13 +120,13 @@ const EVPKDF = async (
 
   while (rawKey.byteLength < KEY_SIZE + IV_SIZE) {
     let buffer = await crypto.subtle.digest(
-      "SHA-384",
+      algorithm,
       concatUint8Array(block, passphrase, salt),
     );
 
     for (let i = 1; i < iterations; i++) {
       buffer = await crypto.subtle.digest(
-        "SHA-384",
+        algorithm,
         buffer,
       );
     }
