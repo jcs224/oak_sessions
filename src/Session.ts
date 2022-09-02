@@ -1,7 +1,7 @@
 import { nanoid } from 'https://deno.land/x/nanoid@v3.0.0/async.ts'
 import MemoryStore from './stores/MemoryStore.ts'
 import CookieStore from './stores/CookieStore.ts'
-import type { Context } from '../deps.ts'
+import type { Context, Middleware } from '../deps.ts'
 import type Store from './stores/Store.ts'
 import type { CookiesGetOptions, CookiesSetDeleteOptions } from '../deps.ts'
 
@@ -41,7 +41,7 @@ export default class Session {
     cookieSetOptions = {}
   }: SessionOptions = {}) {
   
-    return async (ctx : Context, next : () => Promise<unknown>) => {
+    const initMiddleware: Middleware = async (ctx, next) => {
       // get sessionId from cookie
       const sid = await ctx.cookies.get('session', cookieGetOptions)
       let session: Session;
@@ -85,6 +85,8 @@ export default class Session {
         store instanceof CookieStore ? store.deleteSession(ctx) : await store.deleteSession(session.sid)
       }
     }
+    
+    return initMiddleware
   }
 
   // should only be called in `initMiddleware()` when validating session data
