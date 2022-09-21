@@ -3,8 +3,6 @@ description: 'Checkout, setup, and run cypress tests'
 runs:
   using: "composite"
   steps:
-    - name: Clone repository
-      uses: actions/checkout@v2
     - name: Setup Deno
       uses: denoland/setup-deno@v1
     - name: Run Cypress tests
