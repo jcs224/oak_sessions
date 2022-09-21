@@ -38,10 +38,10 @@ export async function makeStore(): Promise<Store | CookieStore> {
     case 'postgres': {
       const sql = postgres({
         host: 'localhost',
-        port: 26257,
-        database: 'defaultdb',
-        user: 'root',
-        password: '',
+        port: 5432,
+        database: 'postgres',
+        user: 'postgres',
+        password: 'postgres',
       });
       const store = new PostgresStore(sql);
       await store.initSessionsTable();

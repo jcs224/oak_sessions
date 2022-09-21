@@ -1,4 +1,4 @@
-name: Test Sessions
+name: CI
 
 on:
   pull_request:
@@ -117,6 +117,39 @@ jobs:
     runs-on: ubuntu-latest
     env:
       STORE: sqlite
+    permissions:
+      contents: read # Needed to clone the repository
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v2
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v2
+        with:
+          working-directory: ./test
+          start: deno run -A ./server.ts
+          spec: cypress/integration/sessions.spec.js
+          wait-on: 'http://localhost:8002'
+          browser: chrome
+          headless: true
+
+  test-postgres-session-store:
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    runs-on: ubuntu-latest
+    env:
+      STORE: postgres
     permissions:
       contents: read # Needed to clone the repository
     steps:
