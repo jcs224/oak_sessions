@@ -1,5 +1,5 @@
 import Store from './Store.ts'
-import type { Redis } from 'https://deno.land/x/redis@v0.25.0/mod.ts'
+import type { Redis } from 'https://deno.land/x/redis@v0.27.0/mod.ts'
 import { SessionData } from '../Session.ts'
 
 export default class RedisStore implements Store {
