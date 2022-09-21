@@ -41,3 +41,28 @@ jobs:
           wait-on: 'http://localhost:8002'
           browser: chrome
           headless: true
+
+  test-redis-session-store:
+    runs-on: ubuntu-latest
+    env:
+      STORE: redis
+    permissions:
+      contents: read # Needed to clone the repository
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v2
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+      - name: Setup Redis
+        uses: supercharge/redis-github-action@1.4.0
+        with:
+          redis-version: 7
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v2
+        with:
+          working-directory: ./test
+          start: deno run -A ./server.ts
+          spec: cypress/integration/sessions.spec.js
+          wait-on: 'http://localhost:8002'
+          browser: chrome
+          headless: true
