@@ -1,11 +1,14 @@
 import Store from './Store.ts'
 import { SessionData } from '../Session.ts'
+import type postgres from "https://deno.land/x/postgresjs@v3.1.0/mod.js";
+
+type SQLExecutor = postgres.Sql<{[name: string]: unknown;}>;
 
 export default class PostgresStore implements Store {
-  sql: any
+  sql: SQLExecutor
   tableName: string
 
-  constructor(sql: any, tableName = 'sessions') {
+  constructor(sql: SQLExecutor, tableName = 'sessions') {
     this.sql = sql
     this.tableName = tableName
   }
@@ -15,12 +18,12 @@ export default class PostgresStore implements Store {
   }
 
   async sessionExists(sessionId: string) {
-    let result = await this.sql`select data from ${this.sql(this.tableName)} where id = ${sessionId}`
+    const result = await this.sql`select data from ${this.sql(this.tableName)} where id = ${sessionId}`
     return result.length > 0 ? true : false
   }
 
   async getSessionById(sessionId: string) {
-    let result = await this.sql`select data from ${this.sql(this.tableName)} where id = ${sessionId}`
+    const result = await this.sql`select data from ${this.sql(this.tableName)} where id = ${sessionId}`
     return result.length > 0 ? JSON.parse(result[0].data) as SessionData : null
   }
 

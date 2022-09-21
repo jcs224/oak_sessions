@@ -20,7 +20,7 @@ export default class RedisStore implements Store {
     const session = await this.db.get(this.keyPrefix + sessionId)
 
     if (session) {
-      const sessionString : string = String(await this.db.get(this.keyPrefix + sessionId))
+      const sessionString = String(await this.db.get(this.keyPrefix + sessionId))
       const value = JSON.parse(sessionString) as SessionData
       return value
     } else {

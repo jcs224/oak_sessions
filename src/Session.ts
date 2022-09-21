@@ -118,6 +118,8 @@ export default class Session {
 
   // set _delete to true, will be deleted in middleware
   // should be called by user using `ctx.state.session.deleteSession()`
+  // we might be able to remove async here, but that might be a breaking change?
+  // deno-lint-ignore require-await
   async deleteSession() : Promise<void> {
     this.data._delete = true
   }

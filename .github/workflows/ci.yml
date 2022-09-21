@@ -1,23 +1,37 @@
 name: Test Sessions
 
 on:
+  pull_request:
+    types:
+      - synchronize
   push:
     branches:
       - main
 
 jobs:
-  test-sessions:
+  check-code-quality:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read # Needed to clone the repository
-
     steps:
       - name: Clone repository
         uses: actions/checkout@v2
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+      - name: Lint
+        run: deno lint
+      - name: Typecheck
+        run: deno task typecheck
 
-      - name: Install Deno
-        run: curl -fsSL https://deno.land/install.sh | sh
-
+  test-memory-session-store:
+    runs-on: ubuntu-latest
+    env:
+      STORE: memory
+    permissions:
+      contents: read # Needed to clone the repository
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v2
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
       - name: Run Cypress tests
         uses: cypress-io/github-action@v2
         with:
