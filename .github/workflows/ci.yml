@@ -28,19 +28,8 @@ jobs:
     permissions:
       contents: read # Needed to clone the repository
     steps:
-      - name: Clone repository
-        uses: actions/checkout@v2
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
-      - name: Run Cypress tests
-        uses: cypress-io/github-action@v2
-        with:
-          working-directory: ./test
-          start: deno run -A ./server.ts
-          spec: cypress/integration/sessions.spec.js
-          wait-on: 'http://localhost:8002'
-          browser: chrome
-          headless: true
+      - name: Run integration tests
+        uses: ./.github/workflows/cypress-test.yml
 
   test-redis-session-store:
     runs-on: ubuntu-latest
@@ -49,23 +38,12 @@ jobs:
     permissions:
       contents: read # Needed to clone the repository
     steps:
-      - name: Clone repository
-        uses: actions/checkout@v2
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
       - name: Setup Redis
         uses: supercharge/redis-github-action@1.4.0
         with:
           redis-version: 7
-      - name: Run Cypress tests
-        uses: cypress-io/github-action@v2
-        with:
-          working-directory: ./test
-          start: deno run -A ./server.ts
-          spec: cypress/integration/sessions.spec.js
-          wait-on: 'http://localhost:8002'
-          browser: chrome
-          headless: true
+      - name: Run integration tests
+        uses: ./.github/workflows/cypress-test.yml
 
   test-mongo-session-store:
     runs-on: ubuntu-latest
@@ -74,20 +52,9 @@ jobs:
     permissions:
       contents: read # Needed to clone the repository
     steps:
-      - name: Clone repository
-        uses: actions/checkout@v2
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
-      - name: Start MongoDB
+      - name: Setup MongoDB
         uses: supercharge/mongodb-github-action@1.8.0
         with:
           mongodb-version: 6.0
-      - name: Run Cypress tests
-        uses: cypress-io/github-action@v2
-        with:
-          working-directory: ./test
-          start: deno run -A ./server.ts
-          spec: cypress/integration/sessions.spec.js
-          wait-on: 'http://localhost:8002'
-          browser: chrome
-          headless: true
+      - name: Run integration tests
+        uses: ./.github/workflows/cypress-test.yml
