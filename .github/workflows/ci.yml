@@ -66,3 +66,28 @@ jobs:
           wait-on: 'http://localhost:8002'
           browser: chrome
           headless: true
+
+  test-mongo-session-store:
+    runs-on: ubuntu-latest
+    env:
+      STORE: mongo
+    permissions:
+      contents: read # Needed to clone the repository
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v2
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.8.0
+        with:
+          mongodb-version: 6.0
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v2
+        with:
+          working-directory: ./test
+          start: deno run -A ./server.ts
+          spec: cypress/integration/sessions.spec.js
+          wait-on: 'http://localhost:8002'
+          browser: chrome
+          headless: true
