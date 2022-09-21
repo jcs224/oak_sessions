@@ -36,7 +36,7 @@ export async function makeStore(): Promise<Store | CookieStore> {
         url: 'http://127.0.0.1:7379',
       });
     case 'postgres': {
-      const sql = postgres<typeof PGTypes>({
+      const sql = postgres<PGTypes>({
         host: 'localhost',
         port: 5432,
         database: 'postgres',
@@ -59,8 +59,9 @@ export async function makeStore(): Promise<Store | CookieStore> {
   }
 }
 
-const PGTypes = {
-  string: 'text',
-  datetime: 'timestamp',
-  integer: 'int'
+interface PGTypes {
+  string: 'text';
+  datetime: 'timestamp';
+  integer: 'int';
+  [name: string]: string;
 }
