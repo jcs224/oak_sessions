@@ -1,6 +1,6 @@
 import Store from './Store.ts'
 import { SessionData } from '../Session.ts'
-import type postgres from "https://deno.land/x/postgresjs@v3.1.0/mod.js";
+import type postgres from "https://deno.land/x/postgresjs@v3.2.4/mod.js";
 
 type SQLExecutor = postgres.Sql<{[name: string]: unknown;}>;
 
