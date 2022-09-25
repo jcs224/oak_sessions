@@ -134,6 +134,29 @@ jobs:
           browser: chrome
           headless: true
 
+  test-webdis-session-store:
+    runs-on: ubuntu-latest
+    container:
+      image: nicolasff/webdis:0.1.20
+    env:
+      STORE: webdis
+    permissions:
+      contents: read # Needed to clone the repository
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v2
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v2
+        with:
+          working-directory: ./test
+          start: deno run -A ./server.ts
+          spec: cypress/integration/sessions.spec.js
+          wait-on: 'http://localhost:8002'
+          browser: chrome
+          headless: true
+
   test-postgres-session-store:
     services:
       postgres:
