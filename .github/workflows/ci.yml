@@ -137,7 +137,7 @@ jobs:
   test-webdis-session-store:
     runs-on: ubuntu-latest
     container:
-      image: nicolasff/webdis:0.1.20
+      image: nicolas/webdis:0.1.20
     env:
       STORE: webdis
     permissions:
