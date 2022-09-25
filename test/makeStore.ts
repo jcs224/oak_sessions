@@ -53,7 +53,7 @@ function createSQLiteStore() {
 
 function createWebdisStore() {
   const store = new WebdisStore({
-    url: "http://127.0.0.1:7379",
+    url: "http://localhost:7379",
   });
   return Promise.resolve(store);
 }

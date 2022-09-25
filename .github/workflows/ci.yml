@@ -147,7 +147,7 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v2
       - name: Ping webdis
-        run: curl http://127.0.0.1:7379/PING
+        run: curl http://localhost:7379/PING
       - name: Setup Deno
         uses: denoland/setup-deno@v1
       - name: Run Cypress tests
