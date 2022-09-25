@@ -138,6 +138,8 @@ jobs:
     services:
       webdis:
         image: nicolas/webdis:0.1.20
+        ports:
+          - 7379:7379
     runs-on: ubuntu-latest
     env:
       STORE: webdis
@@ -147,7 +149,7 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v2
       - name: Ping webdis
-        run: curl http://webdis:7379/PING
+        run: curl http://localhost:7379/PING -u user:password
       - name: Setup Deno
         uses: denoland/setup-deno@v1
       - name: Run Cypress tests
