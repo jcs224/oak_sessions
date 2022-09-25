@@ -3,8 +3,8 @@ import type { Database, Collection } from "https://deno.land/x/mongo@v0.29.4/mod
 import type { SessionData } from '../Session.ts'
 
 interface MongoSession {
-  id: string,
-  data: SessionData   
+  id: string;
+  data: SessionData;
 }
 
 export default class MongoStore implements Store {

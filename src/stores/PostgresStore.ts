@@ -2,7 +2,8 @@ import Store from './Store.ts'
 import { SessionData } from '../Session.ts'
 import type postgres from "https://deno.land/x/postgresjs@v3.2.4/mod.js";
 
-type SQLExecutor = postgres.Sql<{[name: string]: unknown;}>;
+// deno-lint-ignore ban-types
+type SQLExecutor = postgres.Sql<{}>;
 
 export default class PostgresStore implements Store {
   sql: SQLExecutor
@@ -14,7 +15,7 @@ export default class PostgresStore implements Store {
   }
 
   async initSessionsTable() {
-    await this.sql`create table if not exists ${this.sql(this.tableName)} (id string not null primary key, data string)`;
+    await this.sql`create table if not exists ${this.sql(this.tableName)} (id varchar(21) not null primary key, data varchar)`;
   }
 
   async sessionExists(sessionId: string) {

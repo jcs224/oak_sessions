@@ -65,9 +65,6 @@ async function createPostgresStore() {
     database: "postgres",
     user: "postgres",
     password: "postgres",
-    types: {
-      BigInt: postgres.BigInt,
-    },
   });
   const store = new PostgresStore(sql);
   await store.initSessionsTable();
