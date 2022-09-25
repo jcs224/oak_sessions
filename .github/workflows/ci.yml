@@ -135,9 +135,10 @@ jobs:
           headless: true
 
   test-webdis-session-store:
+    services:
+      webdis:
+        image: nicolas/webdis:0.1.20
     runs-on: ubuntu-latest
-    container:
-      image: nicolas/webdis:0.1.20
     env:
       STORE: webdis
     permissions:
