@@ -1,6 +1,10 @@
 import { Application, Router } from "../deps.ts"
 import { Session } from '../mod.ts'
 import { makeStore } from "./makeStore.ts";
+import "https://deno.land/std@0.160.0/dotenv/load.ts";
+import { createKeyFromBase64 } from '../src/crypto.ts'
+
+let key = Deno.env.get('APP_KEY') ? await createKeyFromBase64(Deno.env.get('APP_KEY')) : null
 
 type AppState = {
     session: Session
@@ -21,7 +25,8 @@ const store = await makeStore()
 app.use(Session.initMiddleware(store, {
     cookieSetOptions: {
         sameSite: 'lax'
-    }
+    },
+    encryptionKey: key
 }))
 
 router.post('/login', async (ctx) => {

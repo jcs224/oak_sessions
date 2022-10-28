@@ -4,11 +4,13 @@ import CookieStore from './stores/CookieStore.ts'
 import type { Context, Middleware } from '../deps.ts'
 import type Store from './stores/Store.ts'
 import type { CookiesGetOptions, CookiesSetDeleteOptions } from '../deps.ts'
+import { decryptFromBase64, encryptToBase64 } from './crypto.ts'
 
 interface SessionOptions {
   expireAfterSeconds?: number | null
   cookieGetOptions?: CookiesGetOptions
   cookieSetOptions?: CookiesSetDeleteOptions
+  encryptionKey?: CryptoKey | null
 }
 
 export interface SessionData {
@@ -38,12 +40,22 @@ export default class Session {
   static initMiddleware(store: Store | CookieStore = new MemoryStore(), {
     expireAfterSeconds = null,
     cookieGetOptions = {},
-    cookieSetOptions = {}
+    cookieSetOptions = {},
+    encryptionKey = null
   }: SessionOptions = {}) {
   
     const initMiddleware: Middleware = async (ctx, next) => {
       // get sessionId from cookie
-      const sid = await ctx.cookies.get('session', cookieGetOptions)
+      let sid: string | undefined
+
+      const sid_payload = await ctx.cookies.get('session', cookieGetOptions)
+      
+      if (sid_payload && encryptionKey) {
+        sid = await decryptFromBase64(encryptionKey, sid_payload)
+      } else {
+        sid = sid_payload
+      }
+
       let session: Session;
 
       if (sid) {
@@ -73,7 +85,13 @@ export default class Session {
 
       // update _access time
       session.set('_accessed', new Date().toISOString())
-      await ctx.cookies.set('session', session.sid, cookieSetOptions)
+
+      if (encryptionKey) {
+        const payload_string = await encryptToBase64(encryptionKey, session.sid)
+        await ctx.cookies.set('session', payload_string, cookieSetOptions)
+      } else {
+        await ctx.cookies.set('session', session.sid, cookieSetOptions)
+      }
 
 
       await next()
