@@ -8,6 +8,7 @@ import {
   Store,
   WebdisStore,
 } from "../mod.ts";
+import { createKeyFromBase64 } from '../src/crypto.ts'
 import { connect as connectRedis } from "https://deno.land/x/redis@v0.27.0/mod.ts";
 import { DB as sqliteDB } from "https://deno.land/x/sqlite@v3.4.0/mod.ts";
 import { MongoClient } from "https://deno.land/x/mongo@v0.29.4/mod.ts";
@@ -20,6 +21,8 @@ export function makeStore(): Promise<Store | CookieStore> {
   switch (storeType) {
     case "cookie":
       return createCookieStore();
+    case "cookie:crypto-key":
+      return createCookieCryptoKeyStore();
     case "sqlite":
       return createSQLiteStore();
     case "redis":
@@ -39,6 +42,13 @@ export function makeStore(): Promise<Store | CookieStore> {
 
 function createCookieStore() {
   return Promise.resolve(new CookieStore("mandatory-encryption-passphrase"));
+}
+
+async function createCookieCryptoKeyStore() {
+  const key_base64 = 'T67KE10khEJRuot89hjZeg=='
+  const key = await createKeyFromBase64(key_base64)
+
+  return new CookieStore(key)
 }
 
 function createMemoryStore() {

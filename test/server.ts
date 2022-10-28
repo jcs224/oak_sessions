@@ -4,7 +4,8 @@ import { makeStore } from "./makeStore.ts";
 import "https://deno.land/std@0.160.0/dotenv/load.ts";
 import { createKeyFromBase64 } from '../src/crypto.ts'
 
-let key = Deno.env.get('APP_KEY') ? await createKeyFromBase64(Deno.env.get('APP_KEY')) : null
+const key_base64 = 'T67KE10khEJRuot89hjZeg=='
+const key = await createKeyFromBase64(key_base64)
 
 type AppState = {
     session: Session
