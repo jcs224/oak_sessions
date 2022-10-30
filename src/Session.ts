@@ -51,7 +51,11 @@ export default class Session {
       const sid_payload = await ctx.cookies.get('session', cookieGetOptions)
       
       if (sid_payload && encryptionKey) {
-        sid = await decryptFromBase64(encryptionKey, sid_payload)
+        try {
+          sid = await decryptFromBase64(encryptionKey, sid_payload)
+        } catch {
+          sid = sid_payload
+        }
       } else {
         sid = sid_payload
       }
