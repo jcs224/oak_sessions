@@ -20,7 +20,9 @@ app.addEventListener('error', (evt) => {
 
 const router = new Router<AppState>();
 
-// Apply sessions to your Oak application. You can also apply the middleware to specific routes instead of the whole app.
+// Apply sessions to your Oak application.
+// You can also apply the middleware to specific routes instead of the whole app.
+// Without params, default MemoryStore is used. See the Storage chapter below for more info.
 app.use(Session.initMiddleware())
 
 router.post('/login', async (ctx) => {
@@ -106,6 +108,7 @@ import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Session, CookieStore } from "https://deno.land/x/oak_sessions/mod.ts";
 
 const app = new Application();
+// cookie name for the store is configurable, default is: {sessionDataCookieName: 'session_data'}
 const store = new CookieStore('very-secret-key')
 
 // Attach sessions to middleware

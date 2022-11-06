@@ -5,6 +5,7 @@ import type { SessionData } from '../Session.ts'
 interface CookieStoreOptions {
   cookieGetOptions?: CookiesGetOptions;
   cookieSetDeleteOptions?: CookiesSetDeleteOptions;
+  sessionDataCookieName?: string
 }
 
 export default class CookieStore {
@@ -12,16 +13,18 @@ export default class CookieStore {
 
   cookieGetOptions: CookiesGetOptions;
   cookieSetDeleteOptions: CookiesSetDeleteOptions;
+  sessionDataCookieName: string;
 
   constructor(encryptionKey : string, options? : CookieStoreOptions) {
     this.encryptionKey = encryptionKey
 
     this.cookieGetOptions = options?.cookieGetOptions ?? {}
     this.cookieSetDeleteOptions = options?.cookieSetDeleteOptions ?? {}
+    this.sessionDataCookieName = options?.sessionDataCookieName ?? 'session_data'
   }
 
   async getSessionByCtx(ctx : Context) : Promise<SessionData | null> {
-    const sessionDataString : string | undefined = await ctx.cookies.get('session_data', this.cookieGetOptions)
+    const sessionDataString : string | undefined = await ctx.cookies.get(this.sessionDataCookieName, this.cookieGetOptions)
 
     if (!sessionDataString) return null;
 
@@ -38,17 +41,17 @@ export default class CookieStore {
     const dataString = JSON.stringify(initialData)
 
     const encryptedCookie = await encryptCryptoJSAES(dataString, this.encryptionKey)
-    await ctx.cookies.set('session_data', encryptedCookie, this.cookieSetDeleteOptions)
+    await ctx.cookies.set(this.sessionDataCookieName, encryptedCookie, this.cookieSetDeleteOptions)
   }
 
   deleteSession(ctx : Context) {
-    ctx.cookies.delete('session_data', this.cookieSetDeleteOptions)
+    ctx.cookies.delete(this.sessionDataCookieName, this.cookieSetDeleteOptions)
   }
 
   async persistSessionData(ctx : Context, data : SessionData) {
     const dataString = JSON.stringify(data)
 
     const encryptedCookie = await encryptCryptoJSAES(dataString, this.encryptionKey)
-    await ctx.cookies.set('session_data', encryptedCookie, this.cookieSetDeleteOptions)
+    await ctx.cookies.set(this.sessionDataCookieName, encryptedCookie, this.cookieSetDeleteOptions)
   }
 }
