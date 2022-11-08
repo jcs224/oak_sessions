@@ -5,10 +5,12 @@ import type { Context, Middleware } from '../deps.ts'
 import type Store from './stores/Store.ts'
 import type { CookiesGetOptions, CookiesSetDeleteOptions } from '../deps.ts'
 
+
 interface SessionOptions {
   expireAfterSeconds?: number | null
   cookieGetOptions?: CookiesGetOptions
   cookieSetOptions?: CookiesSetDeleteOptions
+  sessionCookieName?: string
 }
 
 export interface SessionData {
@@ -38,12 +40,13 @@ export default class Session {
   static initMiddleware(store: Store | CookieStore = new MemoryStore(), {
     expireAfterSeconds = null,
     cookieGetOptions = {},
-    cookieSetOptions = {}
+    cookieSetOptions = {},
+    sessionCookieName = 'session'
   }: SessionOptions = {}) {
-  
+
     const initMiddleware: Middleware = async (ctx, next) => {
       // get sessionId from cookie
-      const sid = await ctx.cookies.get('session', cookieGetOptions)
+      const sid = await ctx.cookies.get(sessionCookieName, cookieGetOptions)
       let session: Session;
 
       if (sid) {
@@ -73,7 +76,7 @@ export default class Session {
 
       // update _access time
       session.set('_accessed', new Date().toISOString())
-      await ctx.cookies.set('session', session.sid, cookieSetOptions)
+      await ctx.cookies.set(sessionCookieName, session.sid, cookieSetOptions)
 
 
       await next()
