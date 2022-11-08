@@ -2,5 +2,6 @@
 test/database.db
 node_modules
 .vscode
-/garbage
 .env
+database.db
+/garbage

@@ -10,6 +10,7 @@ interface SessionOptions {
   expireAfterSeconds?: number | null
   cookieGetOptions?: CookiesGetOptions
   cookieSetOptions?: CookiesSetDeleteOptions
+  sessionCookieName?: string
   encryptionKey?: CryptoKey | null
 }
 
@@ -41,14 +42,15 @@ export default class Session {
     expireAfterSeconds = null,
     cookieGetOptions = {},
     cookieSetOptions = {},
+    sessionCookieName = 'session',
     encryptionKey = null
   }: SessionOptions = {}) {
-  
+
     const initMiddleware: Middleware = async (ctx, next) => {
       // get sessionId from cookie
       let sid: string | undefined
 
-      const sid_payload = await ctx.cookies.get('session', cookieGetOptions)
+      const sid_payload = await ctx.cookies.get(sessionCookieName, cookieGetOptions)
       
       if (sid_payload && encryptionKey) {
         try {
@@ -92,9 +94,9 @@ export default class Session {
 
       if (encryptionKey) {
         const payload_string = await encryptToBase64(encryptionKey, session.sid)
-        await ctx.cookies.set('session', payload_string, cookieSetOptions)
+        await ctx.cookies.set(sessionCookieName, payload_string, cookieSetOptions)
       } else {
-        await ctx.cookies.set('session', session.sid, cookieSetOptions)
+        await ctx.cookies.set(sessionCookieName, session.sid, cookieSetOptions)
       }
 
 
