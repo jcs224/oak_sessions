@@ -243,6 +243,17 @@ app.use(Session.initMiddleware(store, {
 }))
 ```
 
+## Session key rotation
+Sometimes, you'll want to rotate the session key to help prevent session fixation attacks. If you're using this library to authenticate users, it's wise to rotate the key immediately after the user logs in. 
+
+To rotate the session key, simply add an Oak context state variable on the appropriate route or middleware. The variable can be set before or after the session is initialized.
+
+```js
+(ctx, next) => {
+    ctx.state.rotate_session_key = true
+}
+```
+
 ## Migrating from 3.x to 4.x
 There are some breaking changes in how you initialize your session, but all of the `ctx.state.session` methods (`get`, `set`, `flash`, `has`) still work as they did before, except `deleteSession` no longer takes any arguments, which may or may not be breaking depending on how it's used in your project.
 
