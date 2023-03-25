@@ -1,5 +1,5 @@
 import Store from './Store.ts'
-import type { Database, Collection } from "https://deno.land/x/mongo@v0.29.4/mod.ts";
+import type { Database, Collection } from "https://deno.land/x/mongo@v0.31.2/mod.ts";
 import type { SessionData } from '../Session.ts'
 
 interface MongoSession {
