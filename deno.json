@@ -1,5 +1,5 @@
 {
   "tasks": {
-    "typecheck": "deno check --remote ./mod.ts"
+    "typecheck": "deno check ./mod.ts"
   }
 }
