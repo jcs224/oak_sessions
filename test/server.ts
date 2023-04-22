@@ -8,7 +8,8 @@ const key_base64 = 'LaDKEZklVbEnP0F5YMflRkndjX-rq5Jv-xN9W_bOND0'
 const key = await createKeyFromBase64(key_base64)
 
 type AppState = {
-    session: Session
+    session: Session,
+    rotate_session_key: boolean
 }
 const app = new Application<AppState>()
 
@@ -33,6 +34,8 @@ app.use(Session.initMiddleware(store, {
 router.post('/login', async (ctx) => {
     const form = await ctx.request.body({type: 'form'}).value
     if(form.get('password') === 'correct') {
+        // Rotate session key on authentication
+        ctx.state.rotate_session_key = true
         // Set persistent data in the session
         ctx.state.session.set('email', form.get('email'))
         ctx.state.session.set('failed-login-attempts', null)

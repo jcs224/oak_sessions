@@ -105,7 +105,13 @@ export default class Session {
       if (ctx.state.rotate_session_key && !(store instanceof CookieStore)) {
         await store.deleteSession(session.sid)
         session = await this.createSession(ctx, store, expireAfterSeconds, session.data)
-        await ctx.cookies.set(sessionCookieName, session.sid, cookieSetOptions)
+
+        if (encryptionKey) {
+          const payload_string = await encryptToBase64(encryptionKey, session.sid)
+          await ctx.cookies.set(sessionCookieName, payload_string, cookieSetOptions)
+        } else {
+          await ctx.cookies.set(sessionCookieName, session.sid, cookieSetOptions)
+        }
       }
 
       // request done, push session data to store
