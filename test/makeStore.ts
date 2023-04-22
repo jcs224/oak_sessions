@@ -45,7 +45,7 @@ function createCookieStore() {
 }
 
 async function createCookieCryptoKeyStore() {
-  const key_base64 = 'T67KE10khEJRuot89hjZeg=='
+  const key_base64 = 'LaDKEZklVbEnP0F5YMflRkndjX-rq5Jv-xN9W_bOND0'
   const key = await createKeyFromBase64(key_base64)
 
   return new CookieStore(key)

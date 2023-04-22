@@ -11,7 +11,7 @@ interface SessionOptions {
   cookieGetOptions?: CookiesGetOptions
   cookieSetOptions?: CookiesSetDeleteOptions
   sessionCookieName?: string
-  encryptionKey?: CryptoKey | null
+  encryptionKey?: Uint8Array | null
 }
 
 export interface SessionData {

@@ -9,13 +9,13 @@ interface CookieStoreOptions {
 }
 
 export default class CookieStore {
-  encryptionKey: string | CryptoKey
+  encryptionKey: string | Uint8Array
 
   cookieGetOptions: CookiesGetOptions;
   cookieSetDeleteOptions: CookiesSetDeleteOptions;
   sessionDataCookieName: string;
 
-  constructor(encryptionKey : string | CryptoKey, options? : CookieStoreOptions) {
+  constructor(encryptionKey : string | Uint8Array, options? : CookieStoreOptions) {
     this.encryptionKey = encryptionKey
 
     this.cookieGetOptions = options?.cookieGetOptions ?? {}
