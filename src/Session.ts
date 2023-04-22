@@ -102,6 +102,12 @@ export default class Session {
 
       await next()
 
+      if (ctx.state.rotate_session_key && !(store instanceof CookieStore)) {
+        await store.deleteSession(session.sid)
+        session = await this.createSession(ctx, store, expireAfterSeconds, session.data)
+        await ctx.cookies.set(sessionCookieName, session.sid, cookieSetOptions)
+      }
+
       // request done, push session data to store
       await session.persistSessionData(store)
 
@@ -126,8 +132,13 @@ export default class Session {
   }
 
   // should only be called in `initMiddleware()` when creating a new session
-  private static async createSession(ctx : Context, store : Store | CookieStore, expiration : number | null | undefined) : Promise<Session> {
-    const sessionData = {
+  private static async createSession(
+    ctx : Context, 
+    store : Store | CookieStore, 
+    expiration : number | null | undefined, 
+    defaultData?: SessionData
+  ) : Promise<Session> {
+    const sessionData = defaultData ? defaultData : {
       '_flash': {},
       '_accessed': new Date().toISOString(),
       '_expire': expiration ? new Date(Date.now() + expiration * 1000).toISOString() : null,
