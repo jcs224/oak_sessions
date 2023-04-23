@@ -1,5 +1,5 @@
 import { crypto } from "https://deno.land/std@0.149.0/crypto/mod.ts";
-import _sodium from 'https://esm.sh/libsodium-wrappers@0.7.11'
+import _sodium from 'https://esm.sh/libsodium-wrappers@0.7.11?target=es2022'
 import {
   decode as bd,
   encode as be,
