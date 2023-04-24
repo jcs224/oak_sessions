@@ -6,6 +6,7 @@ import RedisStore from './src/stores/RedisStore.ts'
 import WebdisStore from './src/stores/WebdisStore.ts'
 import PostgresStore from './src/stores/PostgresStore.ts'
 import MongoStore from './src/stores/MongoStore.ts'
+import KvStore from './src/stores/KvStore.ts'
 import Store from "./src/stores/Store.ts";
 
 export type {
@@ -21,4 +22,5 @@ export {
   WebdisStore,
   PostgresStore,
   MongoStore,
+  KvStore
 }

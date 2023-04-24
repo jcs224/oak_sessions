@@ -7,6 +7,7 @@ import {
   MongoStore,
   Store,
   WebdisStore,
+  KvStore,
 } from "../mod.ts";
 import { connect as connectRedis } from "https://deno.land/x/redis@v0.27.0/mod.ts";
 import { DB as sqliteDB } from "https://deno.land/x/sqlite@v3.4.0/mod.ts";
@@ -32,6 +33,8 @@ export function makeStore(): Promise<Store | CookieStore> {
       return createMongoStore();
     case "memory":
       return createMemoryStore();
+    case "kv":
+      return createKvStore();
     default:
       throw new Error(`Unknown STORE type specified: ${storeType}`);
   }
@@ -83,4 +86,9 @@ async function createRedisStore() {
     port: 6379,
   });
   return new RedisStore(redis);
+}
+
+async function createKvStore() {
+  const kv = await Deno.openKv()
+  return new KvStore(kv)
 }
