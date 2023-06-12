@@ -1,5 +1,6 @@
 {
   "tasks": {
-    "typecheck": "deno check ./mod.ts"
+    "typecheck": "deno check ./mod.ts",
+    "main": "deno run --allow-net main.ts"
   }
 }
