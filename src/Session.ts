@@ -1,7 +1,7 @@
 import { nanoid } from 'https://deno.land/x/nanoid@v3.0.0/async.ts'
 import MemoryStore from './stores/MemoryStore.ts'
 import CookieStore from './stores/CookieStore.ts'
-import type { Context, Middleware } from '../deps.ts'
+import type { Context, Middleware, State } from '../deps.ts'
 import type Store from './stores/Store.ts'
 import type { CookiesGetOptions, CookiesSetDeleteOptions } from '../deps.ts'
 
@@ -37,12 +37,12 @@ export default class Session {
     this.ctx = ctx
   }
 
-  static initMiddleware(store: Store | CookieStore = new MemoryStore(), {
+  static initMiddleware<T extends State>(store: Store | CookieStore = new MemoryStore(), {
     expireAfterSeconds = null,
     cookieGetOptions = {},
     cookieSetOptions = {},
     sessionCookieName = 'session'
-  }: SessionOptions = {}) {
+  }: SessionOptions = {}): Middleware<T, Context<T, T>> {
 
     const initMiddleware: Middleware = async (ctx, next) => {
       // get sessionId from cookie
