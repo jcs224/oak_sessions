@@ -53,19 +53,19 @@ router.get("/", async (ctx) => {
     const email = await ctx.state.session.get('email')
     ctx.response.body = `<!DOCTYPE html>
     <body>
-        <p>
+        <p id="message">
             ${message}
         </p>
-        <p>
+        <p id="error">
             ${error}
         </p>
-        <p>
+        <p id="failed-login-attempts">
             ${failedLoginAttempts ? `Failed login attempts: ${failedLoginAttempts}` : ''}
         </p>
 
         ${email ? 
         `<form id="logout" action="/logout" method="post">
-            <button name="logout" type="submit">Log out ${email}</button>
+            <button name="logout" type="submit" id="logout-button">Log out ${email}</button>
         </form>`
         : 
         `<form id="login" action="/login" method="post">
@@ -75,7 +75,7 @@ router.get("/", async (ctx) => {
             <p>
                 <input id="password" name="password" type="password" placeholder="password">
             </p>
-            <button name="login" type="submit">Log in</button>
+            <button name="login" id="login-button" type="submit">Log in</button>
         </form>` 
     }
     </body>`;
