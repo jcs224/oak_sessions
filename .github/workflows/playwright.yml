@@ -5,9 +5,11 @@ on:
   pull_request:
     branches: [ main, master ]
 jobs:
-  test-deno-memory-store:
+  test-memory-store:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      STORE: memory
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-node@v3
