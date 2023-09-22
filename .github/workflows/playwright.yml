@@ -27,3 +27,30 @@ jobs:
     - name: Run Playwright tests
       working-directory: ./playwright
       run: npx playwright test
+
+  test-redis-store:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    env:
+      STORE: redis
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+    - uses: denoland/setup-deno@v1
+      with:
+        deno-version: v1.37.0
+    - name: Setup Redis
+      uses: supercharge/redis-github-action@1.4.0
+      with:
+        redis-version: 7
+    - name: Install dependencies
+      working-directory: ./playwright
+      run: npm ci
+    - name: Install Playwright Browsers
+      working-directory: ./playwright
+      run: npx playwright install chromium
+    - name: Run Playwright tests
+      working-directory: ./playwright
+      run: npx playwright test
