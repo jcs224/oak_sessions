@@ -16,12 +16,6 @@ export default class MongoStore implements Store {
     this.sessions = db.collection(collectionName)
   }
 
-  async sessionExists(sessionId : string) {
-    const session = await this.sessions.findOne({ id: sessionId })
-
-    return session ? true : false
-  }
-
   async getSessionById(sessionId : string) {
     const session = await this.sessions.findOne({ id: sessionId })
 

@@ -18,11 +18,6 @@ export default class PostgresStore implements Store {
     await this.sql`create table if not exists ${this.sql(this.tableName)} (id varchar(21) not null primary key, data varchar)`;
   }
 
-  async sessionExists(sessionId: string) {
-    const result = await this.sql`select data from ${this.sql(this.tableName)} where id = ${sessionId}`
-    return result.length > 0 ? true : false
-  }
-
   async getSessionById(sessionId: string) {
     const result = await this.sql`select data from ${this.sql(this.tableName)} where id = ${sessionId}`
     return result.length > 0 ? JSON.parse(result[0].data) as SessionData : null

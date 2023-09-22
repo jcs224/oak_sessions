@@ -15,13 +15,6 @@ export default class WebdisStore implements Store {
     this.keyPrefix = options.keyPrefix || 'session_'
   }
 
-  async sessionExists(sessionId : string) {
-    const payload = await fetch(this.url + '/GET/' + this.keyPrefix + sessionId)
-    const payloadJSON = await payload.json()
-    const session = payloadJSON.GET
-    return session ? true : false
-  }
-
   async getSessionById(sessionId : string) {
     const payload = await fetch(this.url + '/GET/' + this.keyPrefix + sessionId)
     const payloadJSON = await payload.json()

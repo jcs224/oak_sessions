@@ -8,10 +8,6 @@ export default class MemoryStore implements Store {
     this.data = new Map
   }
 
-  sessionExists(sessionId : string) {
-    return this.data.has(sessionId)
-  }
-
   getSessionById(sessionId : string) {
     return this.data.has(sessionId) ? this.data.get(sessionId)! : null
   }

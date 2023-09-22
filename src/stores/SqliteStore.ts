@@ -12,16 +12,6 @@ export default class SqliteStore implements Store {
     this.db.query(`CREATE TABLE IF NOT EXISTS ${this.tableName} (id TEXT, data TEXT)`)
   }
 
-  sessionExists(sessionId : string) {
-    let session = ''
-    
-    for (const [sess] of this.db.query<string[]>(`SELECT data FROM ${this.tableName} WHERE id = ?`, [sessionId])) {
-      session = sess
-    }
-
-    return session ? true : false;
-  }
-
   getSessionById(sessionId : string) {
     let session = ''
     

@@ -11,11 +11,6 @@ export default class RedisStore implements Store {
     this.db = db
   }
 
-  async sessionExists(sessionId : string) {
-    const session = await this.db.get(this.keyPrefix + sessionId)
-    return session ? true : false
-  }
-
   async getSessionById(sessionId : string) {
     const session = await this.db.get(this.keyPrefix + sessionId)
 
