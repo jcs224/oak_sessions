@@ -3,7 +3,7 @@
 [![Popularity](https://img.shields.io/endpoint?url=https%3A%2F%2Fapiland.deno.dev%2Fshields%2Foak_sessions%2Fpopularity)](https://deno.land/x/oak_sessions)
 [![Latest Version](https://img.shields.io/endpoint?url=https%3A%2F%2Fapiland.deno.dev%2Fshields%2Foak_sessions%2Fversion)](https://deno.land/x/oak_sessions)
 
-Use cookie-based web sessions with the Oak framework.
+Use cookie-based web sessions with the [Oak](https://github.com/oakserver/oak) framework.
 Supports flash messages - session data that is deleted after it's read.
 
 ## Usage
