@@ -257,7 +257,7 @@ To rotate the session key, simply add an Oak context state variable on the appro
 }
 ```
 
-> :warning: Session key rotation doesn't work with CookieStore, by nature of how storing all session data in a cookie works, instead of just a session ID. See the [iron-session](https://github.com/vvo/iron-session#what-are-the-drawbacks) FAQ, which explains the reasoning very well.
+> :warning: Session key rotation isn't necessary with CookieStore, by nature of how storing all session data in a cookie works, instead of just a session ID. See the [iron-session](https://github.com/vvo/iron-session#what-are-the-drawbacks) FAQ, which explains the reasoning very well.
 
 ## Migrating from 3.x to 4.x
 There are some breaking changes in how you initialize your session, but all of the `ctx.state.session` methods (`get`, `set`, `flash`, `has`) still work as they did before, except `deleteSession` no longer takes any arguments, which may or may not be breaking depending on how it's used in your project.
