@@ -15,9 +15,9 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - uses: denoland/setup-deno@v1
+    - uses: denoland/setup-deno@v2
       with:
-        deno-version: v1.37.0
+        deno-version: v2.0.3
     - name: Install dependencies
       working-directory: ./playwright
       run: npm ci
@@ -38,9 +38,9 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - uses: denoland/setup-deno@v1
+    - uses: denoland/setup-deno@v2
       with:
-        deno-version: v1.37.0
+        deno-version: v2.0.3
     - name: Setup Redis
       uses: supercharge/redis-github-action@1.4.0
       with:
@@ -65,9 +65,9 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - uses: denoland/setup-deno@v1
+    - uses: denoland/setup-deno@v2
       with:
-        deno-version: v1.37.0
+        deno-version: v2.0.3
     - name: Setup Mongo
       uses: supercharge/mongodb-github-action@1.8.0
       with:
@@ -92,9 +92,9 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - uses: denoland/setup-deno@v1
+    - uses: denoland/setup-deno@v2
       with:
-        deno-version: v1.37.0
+        deno-version: v2.0.3
     - name: Install dependencies
       working-directory: ./playwright
       run: npm ci
@@ -115,9 +115,9 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - uses: denoland/setup-deno@v1
+    - uses: denoland/setup-deno@v2
       with:
-        deno-version: v1.37.0
+        deno-version: v2.0.3
     - name: Install dependencies
       working-directory: ./playwright
       run: npm ci
@@ -143,9 +143,9 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - uses: denoland/setup-deno@v1
+    - uses: denoland/setup-deno@v2
       with:
-        deno-version: v1.37.0
+        deno-version: v2.0.3
     - name: Install dependencies
       working-directory: ./playwright
       run: npm ci
@@ -178,9 +178,9 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - uses: denoland/setup-deno@v1
+    - uses: denoland/setup-deno@v2
       with:
-        deno-version: v1.37.0
+        deno-version: v2.0.3
     - name: Install dependencies
       working-directory: ./playwright
       run: npm ci
