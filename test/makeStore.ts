@@ -9,7 +9,7 @@ import {
   WebdisStore,
 } from "../mod.ts";
 import { connect as connectRedis } from "https://deno.land/x/redis@v0.27.0/mod.ts";
-import { DB as sqliteDB } from "https://deno.land/x/sqlite@v3.4.0/mod.ts";
+import { DB as sqliteDB } from "https://deno.land/x/sqlite@v3.9.1/mod.ts";
 import { MongoClient } from "https://deno.land/x/mongo@v0.29.4/mod.ts";
 import postgres from "https://deno.land/x/postgresjs@v3.2.4/mod.js";
 
