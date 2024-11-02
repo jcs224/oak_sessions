@@ -1,6 +1,6 @@
 {
   "name": "@jcs224/oak-sessions",
-  "version": "6.0.0",
+  "version": "8.0.0",
   "exports": "./mod.ts",
   "tasks": {
     "typecheck": "deno check ./mod.ts"
