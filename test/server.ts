@@ -1,4 +1,4 @@
-import { Application, Router } from "jsr:@oak/oak@^12"
+import { Application, Router } from "jsr:@oak/oak@^13"
 import { Session } from '../mod.ts'
 import { makeStore } from "./makeStore.ts";
 
@@ -25,7 +25,7 @@ app.use(Session.initMiddleware(store, {
 }))
 
 router.post('/login', async (ctx) => {
-  const form = await ctx.request.body({type: 'form'}).value
+  const form = await ctx.request.body.form()
     if(form.get('password') === 'correct') {
         // Set persistent data in the session
         ctx.state.session.set('email', form.get('email'))

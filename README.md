@@ -9,7 +9,7 @@ Supports flash messages - session data that is deleted after it's read.
 ## Usage
 
 ```ts
-import { Application, Router } from "jsr:@oak/oak@^12";
+import { Application, Router } from "jsr:@oak/oak@^13";
 import { Session } from "https://deno.land/x/oak_sessions/mod.ts";
 
 type AppState = {
@@ -29,7 +29,7 @@ const router = new Router<AppState>();
 app.use(Session.initMiddleware())
 
 router.post('/login', async (ctx) => {
-    const form = await ctx.request.body({type: 'form'}).value
+    const form = await ctx.request.body.form()
     if(form.get('password') === 'correct') {
         // Set persistent data in the session
         ctx.state.session.set('email', form.get('email'))
