@@ -9,7 +9,7 @@ Supports flash messages - session data that is deleted after it's read.
 ## Usage
 
 ```ts
-import { Application, Router } from "jsr:@oak/oak@^13";
+import { Application, Router } from "jsr:@oak/oak@^14";
 import { Session } from "https://deno.land/x/oak_sessions/mod.ts";
 
 type AppState = {
@@ -247,6 +247,7 @@ app.use(Session.initMiddleware(store, {
 ```
 
 ## Session key rotation
+
 Sometimes, you'll want to rotate the session key to help prevent session fixation attacks. If you're using this library to authenticate users, it's wise to rotate the key immediately after the user logs in. 
 
 To rotate the session key, simply add an Oak context state variable on the appropriate route or middleware. The variable can be set before or after the session is initialized.
@@ -263,3 +264,13 @@ To rotate the session key, simply add an Oak context state variable on the appro
 There are some breaking changes in how you initialize your session, but all of the `ctx.state.session` methods (`get`, `set`, `flash`, `has`) still work as they did before, except `deleteSession` no longer takes any arguments, which may or may not be breaking depending on how it's used in your project.
 
 See more detail in the [migration guide](https://github.com/jcs224/oak_sessions/wiki/Migration-guide) wiki.
+
+## Using the library with the correct `oak` version
+
+To keep up with the correct types, you have to use the correct major version to match with the corresponding version of `oak`.
+
+| Oak version | Session library version |
+| --- | --- |
+| ^12 | ^4.1.12
+| ^13 | ^5.0.0 |
+| ^14 | ^6.0.0 |
