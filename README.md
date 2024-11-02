@@ -9,7 +9,7 @@ Supports flash messages - session data that is deleted after it's read.
 ## Usage
 
 ```ts
-import { Application, Router } from "jsr:@oak/oak@^14";
+import { Application, Router } from "jsr:@oak/oak@^15";
 import { Session } from "https://deno.land/x/oak_sessions/mod.ts";
 
 type AppState = {
@@ -274,3 +274,4 @@ To keep up with the correct types, you have to use the correct major version to 
 | ^12 | ^4.1.12
 | ^13 | ^5.0.0 |
 | ^14 | ^6.0.0 |
+| ^15 | ^7.0.0 |
